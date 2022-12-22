@@ -55,7 +55,7 @@ def create_parent_xforms(asset_usd_path, source_prim_path, save_as_path=None):
         Moves material assignment to new parent prim if any exists on the Mesh/Geometry prim.
 
         Args:
-            asset_usd_path (str): USD file path for asset
+            asset_usd_path (str): USD file path for assets
             source_prim_path (str): USD path of root prim
             save_as_path (str): USD file path for modified USD stage. Defaults to None, will save in same file.
     """
@@ -86,11 +86,11 @@ def create_parent_xforms(asset_usd_path, source_prim_path, save_as_path=None):
 def convert_asset_instanceable(asset_usd_path, source_prim_path, save_as_path=None, create_xforms=True):
     """ Makes all mesh/geometry prims instanceable.
         Can optionally add UsdGeom.Xform prim as parent for all mesh/geometry prims.
-        Makes a copy of the asset USD file, which will be used for referencing. 
-        Updates asset file to convert all parent prims of mesh/geometry prims to reference cloned USD file.
+        Makes a copy of the assets USD file, which will be used for referencing.
+        Updates assets file to convert all parent prims of mesh/geometry prims to reference cloned USD file.
 
         Args:
-            asset_usd_path (str): USD file path for asset
+            asset_usd_path (str): USD file path for assets
             source_prim_path (str): USD path of root prim
             save_as_path (str): USD file path for modified USD stage. Defaults to None, will save in same file.
             create_xforms (bool): Whether to add new UsdGeom.Xform prims to mesh/geometry prims.

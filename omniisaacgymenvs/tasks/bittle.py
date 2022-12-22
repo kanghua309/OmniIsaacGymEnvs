@@ -97,8 +97,8 @@ class BittleTask(RLTask):
         self._num_envs = self._task_cfg["env"]["numEnvs"]
         self._bittle_translation = torch.tensor([0.0, 0.0, 0.62])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 48
-        self._num_actions = 8
+        self._num_observations = 36 #FIX
+        self._num_actions = 8 #FIX
 
         RLTask.__init__(self, name, env)
         return

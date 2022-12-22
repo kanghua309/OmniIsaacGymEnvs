@@ -98,7 +98,7 @@ class BittleTask(RLTask):
         self._bittle_translation = torch.tensor([0.0, 0.0, 0.62])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         self._num_observations = 48
-        self._num_actions = 12
+        self._num_actions = 8
 
         RLTask.__init__(self, name, env)
         return
@@ -114,15 +114,6 @@ class BittleTask(RLTask):
         return
 
 
-    left_front_shoulder_joint: 0.4     # [rad] left_front_shoulder_joint
-    left_back_shoulder_joint: -0.4    # [rad] left_back_shoulder_joint
-    right_front_shoulder_joint: 0.4     # [rad] right_front_shoulder_joint
-    right_back_shoulder_joint: -0.4    # [rad] right_back_shoulder_joint
-
-    left_front_knee_joint: -0.8    # [rad] left_front_knee_joint
-    left_back_knee_joint: 0.8     # [rad] left_back_knee_joint
-    right_front_knee_joint: -0.8    # [rad] right_front_knee_joint
-    right_back_knee_joint: 0.8     # [rad] right_back_knee_joint
 
     def get_bittle(self):
         bittle = Bittle(prim_path=self.default_zero_env_path + "/bittle", name="Bittle", translation=self._bittle_translation)
@@ -137,7 +128,7 @@ class BittleTask(RLTask):
         for joint_path in joint_paths:
             set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
 
-        self.default_dof_pos = torch.zeros((self.num_envs, 12), dtype=torch.float, device=self.device, requires_grad=False)
+        self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
         dof_names = bittle.dof_names
         for i in range(self.num_actions):
             name = dof_names[i]
@@ -255,7 +246,7 @@ class BittleTask(RLTask):
         self.actions = torch.zeros(
             self._num_envs, self.num_actions, dtype=torch.float, device=self._device, requires_grad=False
         )
-        self.last_dof_vel = torch.zeros((self._num_envs, 12), dtype=torch.float, device=self._device, requires_grad=False)
+        self.last_dof_vel = torch.zeros((self._num_envs, 8), dtype=torch.float, device=self._device, requires_grad=False)
         self.last_actions = torch.zeros(self._num_envs, self.num_actions, dtype=torch.float, device=self._device, requires_grad=False)
 
         self.time_out_buf = torch.zeros_like(self.reset_buf)

@@ -1,0 +1,1 @@
+PYTHON_PATH scripts\rlgames_train.py task=bittle  num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 max_iterations=2000

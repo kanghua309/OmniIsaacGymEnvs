@@ -5,3 +5,6 @@ PYTHON_PATH scripts\rlgames_train.py task=bittle  test=true checkpoint=runs\Bitt
 PYTHON_PATH -m tensorboard.main --logdir runs/EXPERIMENT_NAME/summaries
 
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+
+
+PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true

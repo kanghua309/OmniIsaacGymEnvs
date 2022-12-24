@@ -35,15 +35,18 @@ env:
 #    RF_HAA: -0.03   # [rad]
 #    RH_HAA: -0.03   # [rad]
 
-    left_front_shoulder_joint: -0.2     # [rad] left_front_shoulder_joint
-    left_back_shoulder_joint: 0.5    # [rad] left_back_shoulder_joint
-    right_front_shoulder_joint: 0.2     # [rad] right_front_shoulder_joint
-    right_back_shoulder_joint: -0.5    # [rad] right_back_shoulder_joint
+    left_front_shoulder_joint: 0.4      # [rad] <-
+    left_back_shoulder_joint: 0.8       # [rad] <-
+    right_front_shoulder_joint: -0.4    # [rad] <-
+    right_back_shoulder_joint: -0.8     # [rad] <-
 
-    left_front_knee_joint: -0.5    # [rad] left_front_knee_joint
-    left_back_knee_joint: -0.8     # [rad] left_back_knee_joint
-    right_front_knee_joint: 0.5    # [rad] right_front_knee_joint
-    right_back_knee_joint: 0.8     # [rad] right_back_knee_joint
+    left_front_knee_joint: -1.0        # [rad] ->
+    left_back_knee_joint: -1.2         # [rad] ->
+    right_front_knee_joint: 1.0        # [rad] ->
+    right_back_knee_joint: 1.2         # [rad] ->
+
+
+
 
   learn:
     # rewards

@@ -70,14 +70,17 @@ class Bittle(Robot):
             articulation_controller=None,
         )
 
-        self._dof_names = ["left_front_shoulder_joint",
-                           "left_back_shoulder_joint",
-                           "right_front_shoulder_joint",
-                           "right_back_shoulder_joint",
-                           "left_front_knee_joint",
-                           "left_back_knee_joint",
-                           "right_front_knee_joint",
-                           "right_back_knee_joint"]
+        self._dof_names = [  # FIX IT  order ?
+            "left_back_shoulder_joint",
+            "left_front_shoulder_joint",
+            "right_back_shoulder_joint",
+            "right_front_shoulder_joint",
+            "left_back_knee_joint",
+            "left_front_knee_joint",
+            "right_back_knee_joint",
+            "right_front_knee_joint"
+        ]
+        print("battle articlation init over")
 
     @property
     def dof_names(self):
@@ -93,6 +96,7 @@ class Bittle(Robot):
                 rb.GetMaxLinearVelocityAttr().Set(1000.0)
                 rb.GetAngularDampingAttr().Set(0.0)
                 rb.GetMaxAngularVelocityAttr().Set(64 / np.pi * 180)
+
 
     def prepare_contacts(self, stage, prim):
         for link_prim in prim.GetChildren():

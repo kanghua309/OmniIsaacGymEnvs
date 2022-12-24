@@ -13,7 +13,7 @@ env:
   controlFrequencyInv: 2
 
   baseInitState:
-    pos: [0.0, 0.0, 0.62] # x,y,z [m]
+    pos: [0.0, 0.0, 0.62] # x,y,z [m]  0.62 好像是bittle  base 的高度？
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -25,8 +25,8 @@ env:
 
   control:
     # PD Drive parameters:
-    stiffness: 85.0  # [N*m/rad]
-    damping: 2.0     # [N*m*s/rad]
+    stiffness: 1300.0  # [N*m/rad]
+    damping: 0.0     # [N*m*s/rad]
     actionScale: 13.5
 
   defaultJointAngles:  # = target angles when action = 0.0
@@ -35,14 +35,14 @@ env:
 #    RF_HAA: -0.03   # [rad]
 #    RH_HAA: -0.03   # [rad]
 
-    left_front_shoulder_joint: 0.4     # [rad] left_front_shoulder_joint
-    left_back_shoulder_joint: -0.4    # [rad] left_back_shoulder_joint
-    right_front_shoulder_joint: 0.4     # [rad] right_front_shoulder_joint
-    right_back_shoulder_joint: -0.4    # [rad] right_back_shoulder_joint
+    left_front_shoulder_joint: -0.2     # [rad] left_front_shoulder_joint
+    left_back_shoulder_joint: 0.5    # [rad] left_back_shoulder_joint
+    right_front_shoulder_joint: 0.2     # [rad] right_front_shoulder_joint
+    right_back_shoulder_joint: -0.5    # [rad] right_back_shoulder_joint
 
-    left_front_knee_joint: -0.8    # [rad] left_front_knee_joint
-    left_back_knee_joint: 0.8     # [rad] left_back_knee_joint
-    right_front_knee_joint: -0.8    # [rad] right_front_knee_joint
+    left_front_knee_joint: -0.5    # [rad] left_front_knee_joint
+    left_back_knee_joint: -0.8     # [rad] left_back_knee_joint
+    right_front_knee_joint: 0.5    # [rad] right_front_knee_joint
     right_back_knee_joint: 0.8     # [rad] right_back_knee_joint
 
   learn:

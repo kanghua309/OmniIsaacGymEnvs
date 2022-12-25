@@ -76,4 +76,7 @@ anymal社区
 https://github.com/ANYbotics/anymal_c_simple_description
 知乎介绍
 https://www.zhihu.com/column/c_1533191136755236864
-
+训练bittle
+https://www.youtube.com/watch?v=d9HEhXH5_hs
+模拟bittle
+https://www.youtube.com/watch?v=phTnbmXM06g&t=436s

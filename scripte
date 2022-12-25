@@ -1,10 +1,13 @@
+执行命令
+
+训练bittle:（目前bittle usd 模型还没搞成instanceable, 在非headless 执行下跑不动）
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 max_iterations=2000
-
-PYTHON_PATH scripts\rlgames_train.py task=bittle  test=true checkpoint=runs\Bittle\nn\last_Bittle_ep_1000_rew_8.642027.pth
-
-PYTHON_PATH -m tensorboard.main --logdir runs/EXPERIMENT_NAME/summaries
-
-PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs\Bittle\nn\Bittle.pth
-
-
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
+
+测试bittle
+PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+问题：这么多bittle,表现不同，要人工选择吗？
+
+查看训练性能
+PYTHON_PATH -m tensorboard.main --logdir runs/bittle/summaries
+http://localhost:6006/

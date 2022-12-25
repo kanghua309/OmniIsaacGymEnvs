@@ -57,11 +57,15 @@ class Bittle(Robot):
 
         if self._usd_path is None:
             assets_root_path = get_assets_root_path()
+
             if assets_root_path is None:
                 carb.log_error("Could not find nucleus server with /Isaac folder")
-            self._usd_path = assets_root_path + "/Isaac/Robots/ANYbotics/bittle_instanceable.usd"
-        add_reference_to_stage(self._usd_path, prim_path)
+            # self._usd_path = assets_root_path + "/localassets/bittle_instanceable.usd"
+            self._usd_path = "omniverse://127.0.0.1/usd/bittle.usd"
 
+            print("path:", name, prim_path, self._usd_path, assets_root_path, self._usd_path)
+        add_reference_to_stage(self._usd_path, prim_path)
+        print("battle articlation init ...")
         super().__init__(
             prim_path=prim_path,
             name=name,
@@ -94,9 +98,8 @@ class Bittle(Robot):
                 rb.GetRetainAccelerationsAttr().Set(False)
                 rb.GetLinearDampingAttr().Set(0.0)
                 rb.GetMaxLinearVelocityAttr().Set(1000.0)
-                rb.GetAngularDampingAttr().Set(0.0)
+                rb.GetAngularDampingAttr().Set(0.0)  # FIX IT
                 rb.GetMaxAngularVelocityAttr().Set(64 / np.pi * 180)
-
 
     def prepare_contacts(self, stage, prim):
         for link_prim in prim.GetChildren():

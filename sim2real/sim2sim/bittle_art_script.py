@@ -43,7 +43,7 @@ async def my_task():
     # # Simulate robot for a fixed number of frames and specify a joint position target
     for i in range(100):
         try:
-            #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim2real\\sim2sim\bittle_posvec.npy")
+            #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim2real\\sim2sim\\bittle_posvec.npy")
             posvec = np.array([0,-75,0,-75,0,75,0,75])
             posvec = posvec/180.0 * 3.14
             for joint, pos in zip(JOINTS, posvec):

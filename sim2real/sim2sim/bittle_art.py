@@ -22,13 +22,13 @@ from omni.isaac.core.utils.nucleus import get_assets_root_path
 
 stage = simulation_app.context.get_stage()
 JOINTS = [
+    "left_back_shoulder_joint",
     "left_back_knee_joint",
     "left_front_shoulder_joint",
     "left_front_knee_joint",
     "right_back_shoulder_joint",
     "right_back_knee_joint",
     "right_front_shoulder_joint",
-    "left_back_shoulder_joint",
     "right_front_knee_joint",
 ]
 assets_root_path = get_assets_root_path()
@@ -36,7 +36,7 @@ if assets_root_path is None:
     carb.log_error("Could not find Isaac Sim assets folder")
     simulation_app.close()
     sys.exit()
-asset_path = assets_root_path + "usd/bittle.usd"
+asset_path = assets_root_path + "usd/bittle.usd" #FIX
 omni.usd.get_context().open_stage(asset_path)
 # start simulation
 omni.timeline.get_timeline_interface().play()

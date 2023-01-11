@@ -83,6 +83,5 @@ https://www.youtube.com/watch?v=d9HEhXH5_hs
 模拟bittle
 https://www.youtube.com/watch?v=phTnbmXM06g&t=436s
 控制bittle
-https://www.hackster.io/shangxu/tutorial-for-simulating-bittle-in-isaac-sim-bb5b3c
 anymal 学习介绍
 https://www.youtube.com/watch?v=Afi17BnSuBM

@@ -55,6 +55,6 @@ async def my_task():
                 dc.set_dof_position_target(dof_ptr, pos)
         except Exception as e:
             print(str(e))
-        #await asyncio.sleep(1)
+        await asyncio.sleep(0.1) #must ， gui not block
 
 asyncio.ensure_future(my_task())

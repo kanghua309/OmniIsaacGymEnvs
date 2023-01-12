@@ -46,7 +46,7 @@ async def my_task(host):
         print("sadsadsad")
         data, addr = s.recvfrom(4096)
         print("ddddddddddd:",data,addr)
-        posvec = np.fromstring(data)
+        posvec = np.fromstring(data,np.float32)
         print('[Recieved] {} {}'.format(posvec, addr))
         # try:
         #     #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim2real\\sim2sim\\bittle_posvec.npy")

@@ -13,7 +13,7 @@ PYTHON_PATH -m tensorboard.main --logdir runs/bittle/summaries
 http://localhost:6006/
 
 
-PYTHON_PATH scripts/rlgames_train.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1 max_iterations=1000 pipeline=cpu sim_device=cpu
+PYTHON_PATH scripts/rlgames_train.py task=Cartpole headless=False num_envs=1 max_iterations=10 pipeline=cpu sim_device=cpu rl_device=cpu
 
 推导
 PYTHON_PATH scripts/infer_test.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1 max_iterations=1000 pipeline=cpu sim_device=cpu

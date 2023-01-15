@@ -44,7 +44,6 @@ import datetime
 import os
 import torch
 
-
 class RLGTrainer():
     def __init__(self, cfg, cfg_dict):
         self.cfg = cfg
@@ -65,8 +64,9 @@ class RLGTrainer():
 
         self.rlg_config_dict = omegaconf_to_dict(self.cfg.train)
 
-    def run(self, env):
+    def run(self,env):
         # create runner and set the settings
+        print("rlg_config_dict:",self.rlg_config_dict)
         runner = Runner(RLGPUAlgoObserver())
         runner.load(self.rlg_config_dict)
         runner.reset()
@@ -83,7 +83,8 @@ class RLGTrainer():
         #     'checkpoint': self.cfg.checkpoint,
         #     'sigma': None
         # })
-        print("=======================:", self.cfg.checkpoint)
+        print("cfg:",self.cfg)
+        print("=======================:",self.cfg.checkpoint)
         agent = runner.create_player()
         agent.restore(self.cfg.checkpoint)
         qps = []
@@ -92,14 +93,21 @@ class RLGTrainer():
         num_steps = 0
 
         is_done = False
-        while not is_done:
-            act = agent.get_action(obs)
-            obs, reward, is_done, info = env.step(act.unsqueeze(0))
-            total_reward += reward.item()
-            num_steps += 1
-            print('num_steps: ', num_steps)
-            print(act, obs)
-
+        obs = agent.obs_to_torch(obs)
+        print("max_iterations:",self.cfg.max_iterations)
+        print("Obs Initialize:", obs)
+        for i in range(self.cfg.max_iterations):
+            is_done = False
+            while not is_done:
+                obs = agent.obs_to_torch(obs)
+                print("Obs 1:", obs)
+                act = agent.get_action(obs)
+                print("Act:", act)
+                obs, reward, is_done, info = env.step(act.unsqueeze(0))
+                print("Obs 2:", obs)
+                total_reward += reward.item()
+                num_steps += 1
+                print('num_steps: ', num_steps)
         print('Total Reward: ', total_reward)
 
         print('Num steps: ', num_steps)
@@ -107,6 +115,7 @@ class RLGTrainer():
 
 @hydra.main(config_name="config", config_path="../cfg")
 def parse_hydra_configs(cfg: DictConfig):
+
     time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     headless = cfg.headless
@@ -131,6 +140,7 @@ def parse_hydra_configs(cfg: DictConfig):
     rlg_trainer = RLGTrainer(cfg, cfg_dict)
     rlg_trainer.launch_rlg_hydra(env)
     rlg_trainer.run(env)
+
 
     env.close()
 

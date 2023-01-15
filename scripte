@@ -1,6 +1,6 @@
 执行命令
 
-训练bittle:（目前bittle usd 模型还没搞成instanceable, 在非headless 执行下跑不动）
+训练bittle:（目前bittle usd 模型还没搞成instanceable, 在非headless 执行下跑不动？）
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 max_iterations=2000
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
 
@@ -11,3 +11,15 @@ PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.confi
 查看训练性能
 PYTHON_PATH -m tensorboard.main --logdir runs/bittle/summaries
 http://localhost:6006/
+
+
+PYTHON_PATH scripts/rlgames_train.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1 max_iterations=1000 pipeline=cpu sim_device=cpu
+
+推导
+PYTHON_PATH scripts/infer_test.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1 max_iterations=1000 pipeline=cpu sim_device=cpu
+使用cpu
+PYTHON_PATH scripts/infer_test.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=False num_envs=1 max_iterations=10 pipeline=cpu sim_device=cpu rl_device=cpu
+注意：
+如果真实环境模拟是不是：
+max_iterations = 1 才对，因为如果失败了，没有必要再继续了
+_max_episode_length = 500 则最大坚持500 step

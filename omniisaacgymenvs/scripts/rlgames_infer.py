@@ -98,7 +98,7 @@ class RLGTrainer():
             total_reward += reward.item()
             num_steps += 1
             print('num_steps: ', num_steps)
-            print(act, obsy)
+            print(act, obs)
 
         print('Total Reward: ', total_reward)
 

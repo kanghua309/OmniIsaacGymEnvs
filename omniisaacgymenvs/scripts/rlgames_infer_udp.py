@@ -47,6 +47,8 @@ import socket
 import time
 import torch
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("Device:", device)
 
 
 address = ('127.0.0.1', 8080)  # 服务端地址和端口
@@ -97,14 +99,17 @@ class RLGTrainer():
 
         #obs = env.reset()
         num_steps = 0
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #连接服务端
+        addr = ("127.0.0.1", 8080)
+        s.sendto(b'', addr) #client send first must
         while(True):
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             data, addr = s.recvfrom(4096)
             obs = np.fromstring(data, np.float32)
-            obs = torch.from_numpy(obs.astype(np.float32)).clone()
+            print("Receive Obs 0:",obs)
+            obs = torch.from_numpy(obs.astype(np.float32)).to(device).clone()
+            print("Receive Obs 1:",obs)
             obs = torch.unsqueeze(obs, 0)
-            print("Receive Obs :",obs)
-            is_done = False
+            print("Receive Obs 1:",obs)
             acts = agent.get_action(obs)
             acts = acts.to('cpu').detach().numpy().copy()
             print("Action:",acts)

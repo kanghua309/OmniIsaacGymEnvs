@@ -23,3 +23,6 @@ PYTHON_PATH scripts/infer_test.py task=Cartpole test=True checkpoint="runs\Cartp
 如果真实环境模拟是不是：
 max_iterations = 1 才对，因为如果失败了，没有必要再继续了
 _max_episode_length = 500 则最大坚持500 step
+
+模拟+推导
+PYTHON_PATH scripts/infer_udp_test.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1

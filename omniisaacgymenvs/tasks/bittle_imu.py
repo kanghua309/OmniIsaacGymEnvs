@@ -137,7 +137,7 @@ class BittleIMUTask(RLTask):
             from pxr import UsdPhysics, UsdLux
             from omni.isaac.core.utils.stage import get_current_stage
             stage = get_current_stage()
-            revoluteJoint = UsdPhysics.RevoluteJoint.Define(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
+            revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
             revoluteJoint.GetLowerLimitAttr().Set(-90.0)
             revoluteJoint.GetUpperLimitAttr().Set(90.0)
 

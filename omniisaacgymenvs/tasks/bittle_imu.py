@@ -138,8 +138,8 @@ class BittleIMUTask(RLTask):
             from omni.isaac.core.utils.stage import get_current_stage
             stage = get_current_stage()
             revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
-            revoluteJoint.GetLowerLimitAttr().Set(-90.0)
-            revoluteJoint.GetUpperLimitAttr().Set(90.0)
+            revoluteJoint.GetLowerLimitAttr().Set(-60.0)
+            revoluteJoint.GetUpperLimitAttr().Set(60.0) #FIX
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
         dof_names = bittle.dof_names

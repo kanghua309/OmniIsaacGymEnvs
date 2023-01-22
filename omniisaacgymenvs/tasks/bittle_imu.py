@@ -29,9 +29,7 @@ from omniisaacgymenvs.tasks.base.rl_task import RLTask
 from omniisaacgymenvs.robots.articulations.bittle import Bittle
 from omniisaacgymenvs.robots.articulations.views.bittle_view import BittleView
 from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
-
 from omni.isaac.core.utils.prims import get_prim_at_path
-
 from omni.isaac.core.utils.torch.rotations import *
 
 import numpy as np
@@ -39,7 +37,7 @@ import torch
 import math
 
 
-class BittleTask(RLTask):
+class BittleIMUTask(RLTask):
     def __init__(
         self,
         name,
@@ -118,7 +116,9 @@ class BittleTask(RLTask):
     def get_bittle(self):
         bittle = Bittle(prim_path=self.default_zero_env_path + "/bittle", name="Bittle", translation=self._bittle_translation)
         self._sim_config.apply_articulation_settings("Bittle", get_prim_at_path(bittle.prim_path), self._sim_config.parse_actor_config("Bittle"))
-
+        #FIX IT
+        bittle.set_anymal_properties(self._stage, bittle.prim)
+        bittle.prepare_contacts(self._stage, bittle.prim)
         # Configure joint properties
         joint_paths = []
         for quadrant in ["left_front", "left_back", "right_front", "right_back"]:
@@ -126,8 +126,20 @@ class BittleTask(RLTask):
                 joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
             joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
-
+            set_drive(prim_path=f"{bittle.prim_path}/{joint_path}",
+                      drive_type="angular",
+                      target_type="position",
+                      target_value=0,
+                      stiffness=1300, #FIX IT -- 否则模型走不动
+                      damping=0,
+                      max_force=1000)
+            #FIX IT set limit upper and lower Attr
+            from pxr import UsdPhysics, UsdLux
+            from omni.isaac.core.utils.stage import get_current_stage
+            stage = get_current_stage()
+            revoluteJoint = UsdPhysics.RevoluteJoint.Define(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
+            revoluteJoint.GetLowerLimitAttr().Set(-90.0)
+            revoluteJoint.GetUpperLimitAttr().Set(90.0)
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
         dof_names = bittle.dof_names

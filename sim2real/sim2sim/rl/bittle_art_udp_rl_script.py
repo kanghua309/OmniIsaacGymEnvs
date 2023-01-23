@@ -132,18 +132,26 @@ async def my_task(host):
 
 
         torso_position, torso_rotation = dc.get_world_poses(clone=False)
+        print("torso_rotation:",torso_rotation)
         velocity = dc.get_angular_velocity()
         ang_velocity = dc.get_linear_velocity()
+        print("velocity & ang_velocity:",velocity,ang_velocity)
         dof_pos = dc.get_joint_positions()
         dof_vel = dc.get_joint_velocities()
+        print("dof_pos & dof_vel:",dof_pos,dof_vel)
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * 2.0          #self.lin_vel_scale
+        print("base_lin_vel:",base_lin_vel)
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * 0.25     #self.ang_vel_scale
+        print("base_ang_vel:",base_ang_vel)
         projected_gravity = quat_rotate(torso_rotation, gravity_vec)
+        print("projected_gravity:",projected_gravity)
         dof_pos_scaled = (dof_pos - default_dof_pos) * 1.0                          #self.dof_pos_scale
         dof_vel_scaled = dof_vel * 0.25                                             #self.dof_vel_scale
         commands_scaled = np.array([0.0,1.0,0.0]) \
                           * np.array([2.0, 2.0, 0.25])
+        print("commands_scaled:",commands_scaled)
         pre_actions = acts
+        print("pre_actions:",pre_actions)
         #转numpy -- torch_tensor.cpu().detach().numpy()
         #obs = np.array([cart_pos, cart_vel, pole_pos, pole_vel], dtype=np.float32)
         #合并多个array 到一个 np.concatenate((a, b), axis=None)

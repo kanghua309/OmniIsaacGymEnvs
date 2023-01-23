@@ -29,9 +29,10 @@ from omniisaacgymenvs.tasks.base.rl_task import RLTask
 from omniisaacgymenvs.robots.articulations.bittle import Bittle
 from omniisaacgymenvs.robots.articulations.views.bittle_view import BittleView
 from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
-from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch.rotations import *
-
+from omni.isaac.core.utils.prims import get_prim_at_path
+from omni.isaac.core.utils.stage import get_current_stage
+from pxr import UsdPhysics, UsdLux
 import numpy as np
 import torch
 import math
@@ -134,8 +135,6 @@ class BittleIMUTask(RLTask):
                       damping=0,
                       max_force=1000)
             #FIX IT set limit upper and lower Attr
-            from pxr import UsdPhysics, UsdLux
-            from omni.isaac.core.utils.stage import get_current_stage
             stage = get_current_stage()
             revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
             revoluteJoint.GetLowerLimitAttr().Set(-60.0)
@@ -199,7 +198,7 @@ class BittleIMUTask(RLTask):
 
         indices = torch.arange(self._bittles.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        current_targets = self.current_targets + self.。 * self.actions * self.dt
+        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
         self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits, self.bittle_dof_upper_limits)
         self._bittles.set_joint_position_targets(self.current_targets, indices)
 

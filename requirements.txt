@@ -1,0 +1,6 @@
+setuptools~=62.4.0
+numpy~=1.21.6
+torch~=1.13.1
+omniisaacgymenvs~=2.0.0
+gym~=0.26.2
+omegaconf~=2.1.1

@@ -21,13 +21,17 @@ env:
   randomCommandVelocityRanges:
     linear_x: [-0., 0.]  # min max [m/s] 8个dof，只能向前或后走，不能横着走
     linear_y: [-1., 1.]  # min max [m/s]
-    yaw: [-1., 1.]       # min max [rad/s]
+    yaw: [-0., 0.]       # min max [rad/s] FIT IT 是不是没有偏航可能？
 
   control:
-    # PD Drive parameters:
+    # PD Drive parameters:  控制类型为P -- P: position, V: velocity, T: torques
+
+    # stiffness = {'joint_a': 10.0, 'joint_b': 15.}  # [N*m/rad]
+    # damping = {'joint_a': 1.0, 'joint_b': 1.5}  # [N*m*s/rad]
     stiffness: 85.0  # [N*m/rad]
     damping: 2.0     # [N*m*s/rad]
-    actionScale: 13.5
+    # action scale: target angle = actionScale * action + defaultAngle
+    actionScale: 13.5 #FIX IT 这个值给的很大呀 0.5 如何
 
   defaultJointAngles:  # = target angles when action = 0.0
 #    LF_HAA: 0.03    # [rad]
@@ -51,11 +55,11 @@ env:
   learn:
     # rewards
     linearVelocityXYRewardScale: 1.0
-    angularVelocityZRewardScale: 0.5
+    angularVelocityZRewardScale: 0.5  #FIX IT 该奖励还是惩罚？
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
-    actionRateRewardScale: -0.006
-    cosmeticRewardScale: -0.06
+    actionRateRewardScale: -0.006 #FIX IT 动作太多是惩罚？
+    cosmeticRewardScale: -0.06 #FIX IT 最后四个关节？
 
     # normalization
     linearVelocityScale: 2.0

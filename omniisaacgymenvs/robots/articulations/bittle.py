@@ -93,9 +93,9 @@ class Bittle(Robot):
                 rb.GetDisableGravityAttr().Set(False)
                 rb.GetRetainAccelerationsAttr().Set(False)
                 rb.GetLinearDampingAttr().Set(0.0)
-                rb.GetMaxLinearVelocityAttr().Set(1000.0)
+                rb.GetMaxLinearVelocityAttr().Set(1000.0)  #FIX IT 最大线速度！ 是不是都应该缩小？
                 rb.GetAngularDampingAttr().Set(0.0)
-                rb.GetMaxAngularVelocityAttr().Set(64 / np.pi * 180)
+                rb.GetMaxAngularVelocityAttr().Set(64 / np.pi * 180) #FIX IT 最大角速度64度/s 是不是都应该缩小？
 
 
     def prepare_contacts(self, stage, prim):

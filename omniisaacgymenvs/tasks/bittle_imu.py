@@ -152,7 +152,7 @@ class BittleIMUTask(RLTask):
         torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
         root_velocities = self._bittles.get_velocities(clone=False)
         dof_pos = self._bittles.get_joint_positions(clone=False)
-        dof_vel = self._bittles.get_joint_velocities(clone=False)
+        dof_vel = self._bittles.get_joint_velocities(clone=False) #FIX 速度是否恒定？
 
         velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
@@ -199,14 +199,14 @@ class BittleIMUTask(RLTask):
 
         indices = torch.arange(self._bittles.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
+        current_targets = self.current_targets + self.。 * self.actions * self.dt
         self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits, self.bittle_dof_upper_limits)
         self._bittles.set_joint_position_targets(self.current_targets, indices)
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
         # randomize DOF velocities
-        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._bittles.num_dof), device=self._device)
+        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._bittles.num_dof), device=self._device) #FIX IT 关节速度是否恒定？
         dof_pos = self.default_dof_pos[env_ids]
         dof_vel = velocities
 

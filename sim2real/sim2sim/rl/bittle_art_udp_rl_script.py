@@ -131,13 +131,8 @@ async def my_task(host):
         projected_gravity = quat_rotate(torso_rotation, gravity_vec)
         dof_pos_scaled = (dof_pos - default_dof_pos) * 1.0                          #self.dof_pos_scale
         dof_vel_scaled = dof_vel * 0.25                                             #self.dof_vel_scale
-        commands_scaled = np.array([0,1,0]) \
-                          * torch.tensor(
-                            #[self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
-                            [2.0, 2.0, 0.25],
-                            requires_grad=False,
-                            device=cpu,
-                         )
+        commands_scaled = np.array([0.0,1.0,0.0]) \
+                          * np.array([2.0, 2.0, 0.25])
         pre_actions = acts
         #转numpy -- torch_tensor.cpu().detach().numpy()
         #obs = np.array([cart_pos, cart_vel, pole_pos, pole_vel], dtype=np.float32)
@@ -150,7 +145,13 @@ async def my_task(host):
         # dof_vel * self.dof_vel_scale,
         # self.actions,
 
-
+        obs = np.concatenate((base_lin_vel,
+                        base_ang_vel,
+                        projected_gravity,
+                        commands_scaled,
+                        dof_pos_scaled,
+                        dof_vel_scaled,
+                        pre_actions), axis=None)
         print("Obs:", obs.tostring())
         s.sendto(obs.tostring(), addr)
         await asyncio.sleep(0.01)  # must ， gui not block

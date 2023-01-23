@@ -104,8 +104,10 @@ class RLGTrainer():
         s.sendto(b'', addr) #client send first must
         while(True):
             data, addr = s.recvfrom(4096)
-            obs = np.fromstring(data, np.float32) #FIX IT obs shape is envs.observation_space
+            obs = np.fromstring(data, np.float32) #FIX IT obs shape is env.observation_space
             print("Receive Obs 0:",obs)
+            obs = obs.reshape(env)
+            print("Receive Obs 0.5:",obs.observation_space.shape,obs)
             obs = torch.from_numpy(obs.astype(np.float32)).to(device).clone()
             print("Receive Obs 1:",obs)
             obs = torch.unsqueeze(obs, 0)

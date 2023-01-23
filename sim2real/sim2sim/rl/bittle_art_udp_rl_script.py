@@ -30,7 +30,17 @@ JOINTS = [
 
 # start simulation
 omni.timeline.get_timeline_interface().play()
-
+gravity_vec = np.array([0.0, 0.0, -1.0])  # FIX IT
+default_dof_pos = np.array([
+    0.4,
+    1.0,
+    -0.4,
+    -1.0,
+    -1.0,
+    -1.2,
+    1.0,
+    1.2,
+])
 
 dc = _dynamic_control.acquire_dynamic_control_interface()
 # Get handle to articulation
@@ -107,17 +117,17 @@ async def my_task(host):
         dofPositionScale: 1.0
         dofVelocityScale: 0.05
         '''
-        gravity_vec = torch.tensor([0.0, 0.0, -1.0], device=cpu) #FIX IT
-        default_dof_pos = np.array([
-           0.4,
-           1.0,
-           -0.4,
-           -1.0,
-           -1.0,
-           -1.2,
-           1.0,
-           1.2,
-        ])
+        # gravity_vec = torch.tensor([0.0, 0.0, -1.0], device=cpu) #FIX IT
+        # default_dof_pos = np.array([
+        #    0.4,
+        #    1.0,
+        #    -0.4,
+        #    -1.0,
+        #    -1.0,
+        #    -1.2,
+        #    1.0,
+        #    1.2,
+        # ])
 
 
 
@@ -145,9 +155,9 @@ async def my_task(host):
         # dof_vel * self.dof_vel_scale,
         # self.actions,
 
-        obs = np.concatenate((base_lin_vel,
-                        base_ang_vel,
-                        projected_gravity,
+        obs = np.concatenate((base_lin_vel.cpu().detach().numpy(),
+                        base_ang_vel.cpu().detach().numpy(),
+                        projected_gravity.cpu().detach().numpy(),
                         commands_scaled,
                         dof_pos_scaled,
                         dof_vel_scaled,

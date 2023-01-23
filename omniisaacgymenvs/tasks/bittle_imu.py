@@ -120,6 +120,16 @@ class BittleIMUTask(RLTask):
         #FIX IT
         bittle.set_anymal_properties(self._stage, bittle.prim)
         bittle.prepare_contacts(self._stage, bittle.prim)
+        #FIX IT - 加入imu ？？
+        from omni.isaac.imu_sensor import _imu_sensor
+        import carb
+        self._is = _imu_sensor.acquire_imu_sensor_interface()
+        props = _imu_sensor.SensorProperties()
+        props.position = carb.Float3(0, 0, 0)
+        props.orientation = carb.Float4(0, 0, 0, 1)
+        #props.sensorPeriod = 1 / 2000 #？？？
+        self._is.add_sensor_on_body(self.default_zero_env_path + "/bittle" + "/base_link", props)
+
         # Configure joint properties
         joint_paths = []
         for quadrant in ["left_front", "left_back", "right_front", "right_back"]:
@@ -147,14 +157,19 @@ class BittleIMUTask(RLTask):
             angle = self.named_default_joint_angles[name]
             self.default_dof_pos[:, i] = angle
 
+
+
     def get_observations(self) -> dict:
-        torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
-        root_velocities = self._bittles.get_velocities(clone=False)
+        #FIX IT
+        reading = self._is.get_sensor_sim_reading(self.default_zero_env_path + "/bittle" + "/base_link")  # 读当前针的树枝
+        torso_rotation = reading.orientation
+        #torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
+        #root_velocities = self._bittles.get_velocities(clone=False)
         dof_pos = self._bittles.get_joint_positions(clone=False)
         dof_vel = self._bittles.get_joint_velocities(clone=False) #FIX 速度是否恒定？
 
-        velocity = root_velocities[:, 0:3]
-        ang_velocity = root_velocities[:, 3:6]
+        velocity = np.array([reading.lin_acc_x * self.dt, reading.lin_acc_y * self.dt, reading.lin_acc_z * self.dt])
+        ang_velocity = np.array([reading.ang_vel_x,reading.ang_vel_y,reading.ang_vel_z])
 
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale

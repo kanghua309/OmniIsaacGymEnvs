@@ -128,9 +128,6 @@ async def my_task(host):
         #    1.0,
         #    1.2,
         # ])
-
-
-
         torso_position, torso_rotation = dc.get_world_poses(clone=False)
         print("torso_rotation:",torso_rotation)
         velocity = dc.get_angular_velocity()

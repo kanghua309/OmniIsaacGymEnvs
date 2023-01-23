@@ -65,7 +65,7 @@ async def my_task(host):
             await asyncio.sleep(0.01)  # must,gui not block
             continue
         print("receive data:", data, addr)
-        acts = [0,0,0,0,0,0,0,0] #FIX IT
+        acts = default_dof_pos #FIX IT
         if data == b'':
             print("client comming on ... ")
         else:

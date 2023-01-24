@@ -56,7 +56,7 @@ async def my_task(host):
         posvec = np.fromstring(data,np.float32)
         print('[Recieved] {} {}'.format(posvec, addr))
         try:
-            #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim2real\\sim2sim\\bittle_posvec.npy")
+            #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim4real\\sim2sim\\bittle_posvec.npy")
             #posvec = np.array([0,-75,0,-75,0,75,0,75])
             posvec = posvec/180.0 * math.pi
             for joint, pos in zip(JOINTS, posvec):

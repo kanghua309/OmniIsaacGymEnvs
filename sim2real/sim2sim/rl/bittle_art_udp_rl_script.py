@@ -85,30 +85,18 @@ async def my_task(host):
         root_velocities = self._bittles.get_velocities(clone=False)
         dof_pos = self._bittles.get_joint_positions(clone=False)
         dof_vel = self._bittles.get_joint_velocities(clone=False)
-
         velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
-
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
-
         commands_scaled = self.commands * torch.tensor(
             [self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
             requires_grad=False,
             device=self.commands.device,
         )
-        
         '''
-
-
-        # cart_pos = dc.get_dof_position(cart_dof_ptr)
-        # cart_vel = dc.get_dof_velocity(cart_dof_ptr)
-        # pole_pos = dc.get_dof_position(pole_dof_ptr)
-        # pole_vel = dc.get_dof_velocity(pole_dof_ptr)
-        #
-        # obs = np.array([cart_pos, cart_vel, pole_pos, pole_vel], dtype=np.float32)
 
         '''    
         # normalization
@@ -117,25 +105,19 @@ async def my_task(host):
         dofPositionScale: 1.0
         dofVelocityScale: 0.05
         '''
-        # gravity_vec = torch.tensor([0.0, 0.0, -1.0], device=cpu) #FIX IT
-        # default_dof_pos = np.array([
-        #    0.4,
-        #    1.0,
-        #    -0.4,
-        #    -1.0,
-        #    -1.0,
-        #    -1.2,
-        #    1.0,
-        #    1.2,
-        # ])
+
+        #获得rotation,return tensor？
         torso_position, torso_rotation = dc.get_world_poses(clone=False)
         print("torso_rotation:",torso_rotation)
+        #获得body的角速度和线速度？，return np
         velocity = dc.get_angular_velocity()
         ang_velocity = dc.get_linear_velocity()
         print("velocity & ang_velocity:",velocity,ang_velocity)
+        #获得关节的位置和速度，return np
         dof_pos = dc.get_joint_positions()
         dof_vel = dc.get_joint_velocities()
         print("dof_pos & dof_vel:",dof_pos,dof_vel)
+        #rotation * 速度的到实际base 线速度？ 数据类型是否满足？
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * 2.0          #self.lin_vel_scale
         print("base_lin_vel:",base_lin_vel)
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * 0.25     #self.ang_vel_scale

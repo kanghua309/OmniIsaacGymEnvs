@@ -104,17 +104,23 @@ class RLGTrainer():
         s.sendto(b'', addr) #client send first must
         while(True):
             data, addr = s.recvfrom(4096)
-            obs = np.fromstring(data, np.float32) #FIX IT obs shape is env.observation_space
+            obs = np.fromstring(data, np.float32)
             print("Receive Obs 0:",obs)
-            obs = obs.reshape(env)
-            print("Receive Obs 0.5:",obs.observation_space.shape,obs)
+            # FIX IT obs shape is env.observation_space,把一纬的np array 变换成
+            print("Receive Obs 0.4:",obs.observation_space.shape)
+            obs = obs.reshape(obs.observation_space.shape)
+            print("Receive Obs 0.5:",obs)
             obs = torch.from_numpy(obs.astype(np.float32)).to(device).clone()
             print("Receive Obs 1:",obs)
+            # 模型训练obs 是env num个，所以这里obs这里要升纬度 [[obs]]
             obs = torch.unsqueeze(obs, 0)
-            print("Receive Obs 1:",obs)
+            print("Receive Obs 2:",obs)
             acts = agent.get_action(obs)
-            acts = acts.to('cpu').detach().numpy().copy() #FIX IT acts shape is envs.action_space
-            print("Action:",acts)
+            # FIX IT acts shape is envs.action_space
+            acts = acts.to('cpu').detach().numpy().copy()
+            print("Action 1:",acts,env.action_space)
+            acts = acts.flatten()
+            print("Action 2:",acts)
             s.sendto(acts.tostring(), addr)
             num_steps += 1
             print('Num steps: ', num_steps)

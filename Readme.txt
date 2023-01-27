@@ -35,8 +35,10 @@ self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_
 B.3
 DP 控制是否要修改
 force = stiffness * (targetPosition - position) + damping * (targetVelocity - velocity)
-The stiffness and damping can be regarded as the P and D term in a typical PID controller. They implies the extent to which the drive attempts to achieve the target position and velocity respectively.
-增大比例系数P，将加快系统的响应，在有静差的情况下有利于减小静差，但是过大的比例系数会使系统有较大的超调，并产生振荡，使稳定性变坏。增大积分时间有利于减小超调，减小振荡，使系统的稳定性增加，但是系统静差消除时间变长。增大微分时间有利于加快系统的响应速度，使系统超调量小，稳定性增加，但系统对扰动的抑制能力减弱
+The stiffness and damping can be regarded as the P and D term in a typical PID controller. They implies the extent to which the drive attempts to achieve the target position and velocity respectively.
+增大比例系数P，将加快系统的响应，在有静差的情况下有利于减小静差，但是过大的比例系数会使系统有较大的超调，并产生振荡，使稳定性变坏。
+增大积分时间有利于减小超调，减小振荡，使系统的稳定性增加，但是系统静差消除时间变长。
+增大微分时间有利于加快系统的响应速度，使系统超调量小，稳定性增加，但系统对扰动的抑制能力减弱
 目前采用anymal的数值
 # action scale: target angle = actionScale * action + defaultAngle （参考https://github.com/leggedrobotics/legged_gym/blob/master/legged_gym/envs/a1/a1_config.py）
 

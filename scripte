@@ -24,5 +24,23 @@ PYTHON_PATH scripts/infer_test.py task=Cartpole test=True checkpoint="runs\Cartp
 max_iterations = 1 才对，因为如果失败了，没有必要再继续了
 _max_episode_length = 500 则最大坚持500 step
 
+--------------------
 模拟+推导
 PYTHON_PATH scripts/infer_udp_test.py task=Cartpole test=True checkpoint="runs\Cartpole\nn\Cartpole.pth" headless=True num_envs=1
+
+
+bittle 模拟过程
+训练bittle
+PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
+
+开始sim 2 sim
+- 打开sim robot 服务端（使用script方式，发送obs，接收且执行action）
+isaac sim 中载入bittle usd
+在script editor 中打开bittle_art_udp_rl_script.py
+- 测试训练效果
+PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=1 train.params.config.minibatch_size=1 train.params.config.horizon_length=1 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+
+- 启动rl 控制程序（和服务端交互）
+PYTHON_PATH scripts/infer_udp_test.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1
+
+

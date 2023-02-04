@@ -25,10 +25,9 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 from omniisaacgymenvs.tasks.base.rl_task import RLTask
-from omniisaacgymenvs.robots.articulations.anymal import Anymal
-from omniisaacgymenvs.robots.articulations.views.anymal_view import AnymalView
+from omniisaacgymenvs.robots.articulations.bittle import Bittle
+from omniisaacgymenvs.robots.articulations.views.bittle_view import BittleView
 from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
 
 from omni.isaac.core.utils.prims import get_prim_at_path
@@ -40,7 +39,7 @@ import torch
 import math
 
 
-class AnymalTask(RLTask):
+class BittleTask(RLTask):
     def __init__(
         self,
         name,
@@ -48,6 +47,7 @@ class AnymalTask(RLTask):
         env,
         offset=None
     ) -> None:
+        print("BittleTask new ")
         self._sim_config = sim_config
         self._cfg = sim_config.config
         self._task_cfg = sim_config.task_config
@@ -96,49 +96,57 @@ class AnymalTask(RLTask):
             self.rew_scales[key] *= self.dt
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._anymal_translation = torch.tensor([0.0, 0.0, 0.62])
+        self._bittle_translation = torch.tensor([0.0, 0.0, 1.08]) #FIX IT
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 48
-        self._num_actions = 12
+        self._num_observations = 36
+        self._num_actions = 8
 
         RLTask.__init__(self, name, env)
+        print("BittleTask new over")
         return
 
     def set_up_scene(self, scene) -> None:
-        self.get_anymal()
+        print("BittleTask setup scene  ")
+        self.get_bittle()
         super().set_up_scene(scene)
-        self._anymals = AnymalView(prim_paths_expr="/World/envs/.*/anymal", name="anymalview")
-        scene.add(self._anymals)
-        scene.add(self._anymals._knees)
-        scene.add(self._anymals._base)
-
+        self._bittles = BittleView(prim_paths_expr="/World/envs/.*/bittle", name="bittleview")
+        scene.add(self._bittles)
+        scene.add(self._bittles._knees)
+        scene.add(self._bittles._base)
+        print("BittleTask setup scene over ")
         return
 
-    def get_anymal(self):
-        anymal = Anymal(prim_path=self.default_zero_env_path + "/anymal", name="Anymal", translation=self._anymal_translation)
-        self._sim_config.apply_articulation_settings("Anymal", get_prim_at_path(anymal.prim_path), self._sim_config.parse_actor_config("Anymal"))
+
+    def get_bittle(self):
+        #print("BittleTask get bittle:",self.default_zero_env_path)
+        bittle = Bittle(prim_path=self.default_zero_env_path + "/bittle", name="Bittle", translation=self._bittle_translation)
+        self._sim_config.apply_articulation_settings("Bittle", get_prim_at_path(bittle.prim_path), self._sim_config.parse_actor_config("Bittle"))
 
         # Configure joint properties
         joint_paths = []
-        for quadrant in ["LF", "LH", "RF", "RH"]:
-            for component, abbrev in [("HIP", "H"), ("THIGH", "K")]:
-                joint_paths.append(f"{quadrant}_{component}/{quadrant}_{abbrev}FE")
-            joint_paths.append(f"base/{quadrant}_HAA")
+        for quadrant in ["left_front","left_back", "right_front", "right_back"]:
+            for component, sub in [("shoulder_link", "knee")]:
+                joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
+            joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{anymal.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
+            print("set driver:",f"{bittle.prim_path}/{joint_path}")
+            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
 
-        self.default_dof_pos = torch.zeros((self.num_envs, 12), dtype=torch.float, device=self.device, requires_grad=False)
-        dof_names = anymal.dof_names
+        self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
+        dof_names = bittle.dof_names
         for i in range(self.num_actions):
             name = dof_names[i]
             angle = self.named_default_joint_angles[name]
             self.default_dof_pos[:, i] = angle
+            print("set angle:", name , angle,self.default_dof_pos[:, i])
+        #print("BittleTask get bittle over")
 
     def get_observations(self) -> dict:
-        torso_position, torso_rotation = self._anymals.get_world_poses(clone=False)
-        root_velocities = self._anymals.get_velocities(clone=False)
-        dof_pos = self._anymals.get_joint_positions(clone=False)
-        dof_vel = self._anymals.get_joint_velocities(clone=False)
+        #print("BittleTask get_observations ")
+        torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
+        root_velocities = self._bittles.get_velocities(clone=False)
+        dof_pos = self._bittles.get_joint_positions(clone=False)
+        dof_vel = self._bittles.get_joint_velocities(clone=False)
 
         velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
@@ -169,13 +177,16 @@ class AnymalTask(RLTask):
         self.obs_buf[:] = obs
 
         observations = {
-            self._anymals.name: {
+            self._bittles.name: {
                 "obs_buf": self.obs_buf
             }
         }
+        #print("BittleTask get_observations over")
         return observations
 
     def pre_physics_step(self, actions) -> None:
+        #print("BittleTask pre_physics_step ")
+
         if not self._env._world.is_playing():
             return
 
@@ -183,16 +194,18 @@ class AnymalTask(RLTask):
         if len(reset_env_ids) > 0:
             self.reset_idx(reset_env_ids)
 
-        indices = torch.arange(self._anymals.count, dtype=torch.int32, device=self._device)
+        indices = torch.arange(self._bittles.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        current_targets = self.current_targets + self.action_scale * self.actions * self.dt 
-        self.current_targets[:] = tensor_clamp(current_targets, self.anymal_dof_lower_limits, self.anymal_dof_upper_limits)
-        self._anymals.set_joint_position_targets(self.current_targets, indices)
+        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
+        self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits, self.bittle_dof_upper_limits)
+        self._bittles.set_joint_position_targets(self.current_targets, indices)
+        #print("BittleTask pre_physics_step over ")
 
     def reset_idx(self, env_ids):
+        #print("BittleTask reset_idx  ")
         num_resets = len(env_ids)
         # randomize DOF velocities
-        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._anymals.num_dof), device=self._device)
+        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._bittles.num_dof), device=self._device)
         dof_pos = self.default_dof_pos[env_ids]
         dof_vel = velocities
 
@@ -202,11 +215,11 @@ class AnymalTask(RLTask):
 
         # apply resets
         indices = env_ids.to(dtype=torch.int32)
-        self._anymals.set_joint_positions(dof_pos, indices)
-        self._anymals.set_joint_velocities(dof_vel, indices)
+        self._bittles.set_joint_positions(dof_pos, indices)
+        self._bittles.set_joint_velocities(dof_vel, indices)
 
-        self._anymals.set_world_poses(self.initial_root_pos[env_ids].clone(), self.initial_root_rot[env_ids].clone(), indices)
-        self._anymals.set_velocities(root_vel, indices)
+        self._bittles.set_world_poses(self.initial_root_pos[env_ids].clone(), self.initial_root_rot[env_ids].clone(), indices)
+        self._bittles.set_velocities(root_vel, indices)
 
         self.commands_x[env_ids] = torch_rand_float(
             self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
@@ -223,18 +236,20 @@ class AnymalTask(RLTask):
         self.progress_buf[env_ids] = 0
         self.last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.
+        #print("BittleTask reset_idx over ")
 
     def post_reset(self):
-        self.initial_root_pos, self.initial_root_rot = self._anymals.get_world_poses()
+        print("BittleTask post_reset -------------------------------------------------------------- ")
+        self.initial_root_pos, self.initial_root_rot = self._bittles.get_world_poses()
         self.current_targets = self.default_dof_pos.clone()
 
-        dof_limits = self._anymals.get_dof_limits()
-        self.anymal_dof_lower_limits = dof_limits[0, :, 0].to(device=self._device)
-        self.anymal_dof_upper_limits = dof_limits[0, :, 1].to(device=self._device)
+        dof_limits = self._bittles.get_dof_limits()
+        self.bittle_dof_lower_limits = dof_limits[0, :, 0].to(device=self._device)
+        self.bittle_dof_upper_limits = dof_limits[0, :, 1].to(device=self._device)
 
         self.commands = torch.zeros(self._num_envs, 3, dtype=torch.float, device=self._device, requires_grad=False)
-        self.commands_y = self.commands.view(self._num_envs, 3)[..., 1]
         self.commands_x = self.commands.view(self._num_envs, 3)[..., 0]
+        self.commands_y = self.commands.view(self._num_envs, 3)[..., 1]
         self.commands_yaw = self.commands.view(self._num_envs, 3)[..., 2]
 
         # initialize some data used later on
@@ -245,20 +260,22 @@ class AnymalTask(RLTask):
         self.actions = torch.zeros(
             self._num_envs, self.num_actions, dtype=torch.float, device=self._device, requires_grad=False
         )
-        self.last_dof_vel = torch.zeros((self._num_envs, 12), dtype=torch.float, device=self._device, requires_grad=False)
+        self.last_dof_vel = torch.zeros((self._num_envs, 8), dtype=torch.float, device=self._device, requires_grad=False)
         self.last_actions = torch.zeros(self._num_envs, self.num_actions, dtype=torch.float, device=self._device, requires_grad=False)
 
         self.time_out_buf = torch.zeros_like(self.reset_buf)
 
         # randomize all envs
-        indices = torch.arange(self._anymals.count, dtype=torch.int64, device=self._device)
+        indices = torch.arange(self._bittles.count, dtype=torch.int64, device=self._device)
         self.reset_idx(indices)
+        #print("BittleTask post_reset over ")
 
     def calculate_metrics(self) -> None:
-        torso_position, torso_rotation = self._anymals.get_world_poses(clone=False)
-        root_velocities = self._anymals.get_velocities(clone=False)
-        dof_pos = self._anymals.get_joint_positions(clone=False)
-        dof_vel = self._anymals.get_joint_velocities(clone=False)
+        #print("BittleTask calculate_metrics  ")
+        torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
+        root_velocities = self._bittles.get_velocities(clone=False)
+        dof_pos = self._bittles.get_joint_positions(clone=False)
+        dof_vel = self._bittles.get_joint_velocities(clone=False)
 
         velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
@@ -283,10 +300,11 @@ class AnymalTask(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._anymals.is_base_below_threshold(threshold=0.51, ground_heights=0.0)
+        self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, ground_heights=0.0)
+        #print("debug fallen over:",self.fallen_over)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
-
+        #print("BittleTask calculate_metrics over ")
 
     def is_done(self) -> None:
         # reset agents

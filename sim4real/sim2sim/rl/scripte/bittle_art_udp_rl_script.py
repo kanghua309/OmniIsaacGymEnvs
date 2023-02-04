@@ -14,14 +14,14 @@ import torch
 from torch import cpu
 
 JOINTS = [
-    "left_back_shoulder_joint",
-    "left_back_knee_joint",
     "left_front_shoulder_joint",
-    "left_front_knee_joint",
-    "right_back_shoulder_joint",
-    "right_back_knee_joint",
+    "left_back_shoulder_joint",
     "right_front_shoulder_joint",
+    "right_back_shoulder_joint",
+    "left_front_knee_joint",
+    "left_back_knee_joint",
     "right_front_knee_joint",
+    "right_back_knee_joint",
 ]
 
 # start simulation
@@ -47,12 +47,22 @@ dc = _dynamic_control.acquire_dynamic_control_interface()
 art = dc.get_articulation("/bittle")
 if art == _dynamic_control.INVALID_HANDLE:
     print("*** '%s' is not an articulation" % "/bittle")
+    exit(-1)
 
 body = dc.find_articulation_body(art, "base_frame_link")
 if body == _dynamic_control.INVALID_HANDLE:
     print("*** '%s' is not an articulation body" % "/base_frame_link")
+    exit(-1)
 
 print("art & body:", art, body)
+
+for joint, pos in zip(JOINTS, default_dof_pos):
+    dof_ptr = dc.find_articulation_dof(art, joint)
+    print("joint:", joint, pos, dof_ptr)
+    # This should be called each frame of simulation if state on the articulation is being changed.
+    dc.wake_up_articulation(art)
+    # Set joint position target
+    dc.set_dof_position_target(dof_ptr, pos)
 
 # transform = dc.get_rigid_body_pose(body)
 # print("torso_rotation:", transform.r)
@@ -189,8 +199,8 @@ async def my_task(host):
 
         print("projected_gravity:", projected_gravity)
         dof_pos_scaled = (dof_pos - default_dof_pos) * 1.0  # self.dof_pos_scale
-        dof_vel_scaled = dof_vel * 0.25  # self.dof_vel_scale
-        commands_scaled = np.array([0.0, 0.0, 0.0], dtype=np.float32) \
+        dof_vel_scaled = dof_vel * 0.05  # self.dof_vel_scale
+        commands_scaled = np.array([0.0, 1.0, 0.0], dtype=np.float32) \
                           * np.array([2.0, 2.0, 0.25], dtype=np.float32)
         print("commands_scaled:", commands_scaled)
 

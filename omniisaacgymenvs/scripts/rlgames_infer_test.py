@@ -99,6 +99,11 @@ class RLGTrainer():
         for i in range(self.cfg.max_iterations):
             is_done = False
             while not is_done:
+                print("Obs 0:", obs)
+                #for bittle 向前走 所以给y 为2
+                # obs['obs'][:, 9] = 0.0
+                # obs['obs'][:, 10] = 1.0
+                # obs['obs'][:, 11] = 0.0
                 obs = agent.obs_to_torch(obs)
                 print("Obs 1:", obs)
                 act = agent.get_action(obs)

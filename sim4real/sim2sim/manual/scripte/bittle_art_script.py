@@ -15,14 +15,14 @@ from omni.isaac.core.utils.nucleus import get_assets_root_path
 
 
 JOINTS = [
-    "left_front_shoulder_joint",
     "left_back_shoulder_joint",
-    "right_front_shoulder_joint",
+    "left_front_shoulder_joint",
     "right_back_shoulder_joint",
-    "left_front_knee_joint",
+    "right_front_shoulder_joint",
     "left_back_knee_joint",
-    "right_front_knee_joint",
+    "left_front_knee_joint",
     "right_back_knee_joint",
+    "right_front_knee_joint",
 ]
 
 
@@ -44,7 +44,7 @@ async def my_task():
     for i in range(100):
         try:
             #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim4real\\sim2sim\\bittle_posvec.npy")
-            posvec = np.array([0,0,0,0,-75,75,-75,75])
+            posvec = np.array([0,0,0,0,75,-75,75,-75])
             posvec = posvec/180.0 * 3.14
             for joint, pos in zip(JOINTS, posvec):
                 dof_ptr = dc.find_articulation_dof(art,joint)

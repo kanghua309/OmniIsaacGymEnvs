@@ -14,28 +14,28 @@ import torch
 from torch import cpu
 
 JOINTS = [
-    "left_front_shoulder_joint",
     "left_back_shoulder_joint",
-    "right_front_shoulder_joint",
+    "left_front_shoulder_joint",
     "right_back_shoulder_joint",
-    "left_front_knee_joint",
+    "right_front_shoulder_joint",
     "left_back_knee_joint",
-    "right_front_knee_joint",
+    "left_front_knee_joint",
     "right_back_knee_joint",
+    "right_front_knee_joint",
 ]
 
 # start simulation
 omni.timeline.get_timeline_interface().play()
 gravity_vec = np.array([0.0, 0.0, -1.0])  # FIX IT
 default_dof_pos = np.array([
+    1.0,
     0.4,
-    1.0,
+    -1.0,
     -0.4,
-    -1.0,
-    -1.0,
     -1.2,
-    1.0,
+    -1.0,
     1.2,
+    1.0,
 ], dtype=np.float32)
 
 cur_dof_pos = np.zeros(8, dtype=np.float32)
@@ -130,6 +130,9 @@ import asyncio
 import socket
 import time
 
+acts = np.zeros(8, dtype=np.float32)
+current_targets = np.zeros(8, dtype=np.float32)
+
 
 async def my_task(host):
     print(f"my task begin")
@@ -145,14 +148,22 @@ async def my_task(host):
             await asyncio.sleep(0.01)  # must,gui not block
             continue
         print("receive data:", data, addr)
-        acts = default_dof_pos  # FIX IT
         if data == b'':
             print("client comming on ... ")
+            acts = default_dof_pos - default_dof_pos# FIX IT
+            current_targets = default_dof_pos
         else:
-            acts = np.fromstring(data, np.float32)
+            acts = np.fromstring(data, np.float32) #It is diff action, not action
             print('[Recieved] {} {}'.format(acts, addr))
 
-            for idx, (joint, pos) in enumerate(zip(JOINTS, acts)):
+            current_targets = current_targets + 13.5 * acts * 1/60
+            current_targets[:] = np.clip(current_targets,-90/180.0 * np.pi ,90/180.0 * np.pi)
+            # current_targets = self.current_targets + self.action_scale * self.actions * self.dt
+            # self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits,
+            #                                        self.bittle_dof_upper_limits)
+            print("current_targets:",current_targets)
+
+            for idx, (joint, pos) in enumerate(zip(JOINTS, current_targets)):
                 dof_ptr = dc.find_articulation_dof(art, joint)
                 print("joint1:", idx, joint, pos, dof_ptr)
                 dof_state = dc.get_dof_state(dof_ptr, _dynamic_control.STATE_ALL)
@@ -200,6 +211,8 @@ async def my_task(host):
         print("projected_gravity:", projected_gravity)
         dof_pos_scaled = (dof_pos - default_dof_pos) * 1.0  # self.dof_pos_scale
         dof_vel_scaled = dof_vel * 0.05  # self.dof_vel_scale
+        print("dof_pos_scaled:", dof_pos_scaled)
+        print("dof_vel_scaled:", dof_vel_scaled)
         commands_scaled = np.array([0.0, 1.0, 0.0], dtype=np.float32) \
                           * np.array([2.0, 2.0, 0.25], dtype=np.float32)
         print("commands_scaled:", commands_scaled)

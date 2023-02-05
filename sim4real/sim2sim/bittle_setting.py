@@ -16,8 +16,10 @@ for joint_path in joint_paths:
     # print(drive)
     # drive.GetTargetVelocityAttr().Set(30)
     # drive.GetTargetPositionAttr().Set(1)
-    drive.GetDampingAttr().Set(0)
-    drive.GetStiffnessAttr().Set(1000)
+    drive.GetTargetPositionAttr().Set(0)
+    drive.GetDampingAttr().Set(40)
+    drive.GetStiffnessAttr().Set(400)
+    drive.GetMaxForceAttr().Set(1000)
 
 
 curr_prim = stage.GetPrimAtPath("/bittle")
@@ -37,7 +39,7 @@ for link_prim in curr_prim.GetChildren():
         print("link_prim 3:", link_prim)
         mass_api = UsdPhysics.MassAPI.Apply(link_prim)
         #mass_api.CreateMassAttr(10)
-        mass_api.GetMassAttr().set(0.0)
+        #mass_api.GetMassAttr().Set(0.0)
         ### Alternatively set the density
         #mass_api.CreateDensityAttr(1000)
-        mass_api.GetDensityAttr().set(0.0)
+        #mass_api.GetDensityAttr().Set(0.0)

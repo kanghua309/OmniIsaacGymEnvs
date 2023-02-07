@@ -51,18 +51,31 @@ if art == _dynamic_control.INVALID_HANDLE:
 
 body = dc.find_articulation_body(art, "base_frame_link")
 if body == _dynamic_control.INVALID_HANDLE:
-    print("*** '%s' is not an articulation body" % "/base_frame_link")
+    print("*** '%s' is not an articulation body" % "base_frame_link")
     exit(-1)
 
 print("art & body:", art, body)
 
-for joint, pos in zip(JOINTS, default_dof_pos):
+lower_limits = np.zeros(8)
+upper_limits = np.zeros(8)
+
+for i,joint in enumerate(JOINTS):
     dof_ptr = dc.find_articulation_dof(art, joint)
-    print("joint:", joint, pos, dof_ptr)
-    # This should be called each frame of simulation if state on the articulation is being changed.
-    dc.wake_up_articulation(art)
-    # Set joint position target
-    dc.set_dof_position_target(dof_ptr, pos)
+    prop = dc.get_dof_properties(dof_ptr)
+    lower_limits[i] = prop.lower
+    upper_limits[i] = prop.upper
+
+print("lower_limits:",lower_limits)
+print("upper_limits:",upper_limits)
+
+
+# for joint, pos in zip(JOINTS, default_dof_pos):
+#     dof_ptr = dc.find_articulation_dof(art, joint)
+#     print("joint:", joint, pos, dof_ptr)
+#     # This should be called each frame of simulation if state on the articulation is being changed.
+#     dc.wake_up_articulation(art)
+#     # Set joint position target
+#     dc.set_dof_position_target(dof_ptr, pos)
 
 # transform = dc.get_rigid_body_pose(body)
 # print("torso_rotation:", transform.r)
@@ -150,33 +163,36 @@ async def my_task(host):
         print("receive data:", data, addr)
         if data == b'':
             print("client comming on ... ")
-            acts = default_dof_pos - default_dof_pos# FIX IT
-            current_targets = default_dof_pos
+            acts = default_dof_pos - default_dof_pos # FIX IT
+            current_targets = default_dof_pos.copy()
         else:
             acts = np.fromstring(data, np.float32) #It is diff action, not action
             print('[Recieved] {} {}'.format(acts, addr))
 
-            current_targets = current_targets + 13.5 * acts * 1/60
-            current_targets[:] = np.clip(current_targets,-90/180.0 * np.pi ,90/180.0 * np.pi)
+            _current_targets = current_targets + 13.5 * acts * 1/60
+            current_targets[:] = np.clip(_current_targets,lower_limits,upper_limits)
             # current_targets = self.current_targets + self.action_scale * self.actions * self.dt
             # self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits,
             #                                        self.bittle_dof_upper_limits)
             print("current_targets:",current_targets)
 
-            for idx, (joint, pos) in enumerate(zip(JOINTS, current_targets)):
-                dof_ptr = dc.find_articulation_dof(art, joint)
-                print("joint1:", idx, joint, pos, dof_ptr)
-                dof_state = dc.get_dof_state(dof_ptr, _dynamic_control.STATE_ALL)
-                print("joint2:", idx, joint, pos, dof_state)
-                cur_dof_pos[idx] = dof_state.pos
-                cur_dof_vel[idx] = dof_state.vel
-                # This should be called each frame of simulation if state on the articulation is being changed.
-                dc.wake_up_articulation(art)
-                # Set joint position target
-                dc.set_dof_position_target(dof_ptr, pos)
+        for idx, (joint, pos) in enumerate(zip(JOINTS, current_targets)):
+            dof_ptr = dc.find_articulation_dof(art, joint)
+            print("joint1:", idx, joint, pos, dof_ptr)
+            # dof_state = dc.get_dof_state(dof_ptr, _dynamic_control.STATE_ALL)
+            # print("joint2:", idx, joint, pos, dof_state)
+            # cur_dof_pos[idx] = dof_state.pos
+            # cur_dof_vel[idx] = dof_state.vel
+            # This should be called each frame of simulation if state on the articulation is being changed.
+            dc.wake_up_articulation(art)
+            # Set joint position target
+            dc.set_dof_position_target(dof_ptr, pos)
+            # dof_state = dc.get_dof_state(dof_ptr, _dynamic_control.STATE_ALL)
+            # print("joint2:", idx, joint, pos, dof_state)
+            # cur_dof_pos[idx] = dof_state.pos
+            # cur_dof_vel[idx] = dof_state.vel
 
         print("prepare send obs now")
-
         # 获得rotation,return tensor？
         transform = dc.get_rigid_body_pose(body)
         print("torso_rotation:", transform.r)
@@ -184,6 +200,7 @@ async def my_task(host):
         torso_rotation = torch.Tensor(
             [transform.r.w, transform.r.x, transform.r.y, transform.r.z])  # FIX IT w index change
         torso_rotation = torch.unsqueeze(torso_rotation, 0)
+        # torso_rotation = torch.unsqueeze( transform.r, 0)
         print("torse_rotation's rotaion1:", torso_rotation)
 
         # 获得body的角速度和线速度？，return np
@@ -195,8 +212,8 @@ async def my_task(host):
         print("gravity_vec:", _gravity_vec)
 
         # 获得关节的位置和速度，return np
-        dof_pos = cur_dof_pos
-        dof_vel = cur_dof_vel
+        dof_pos = np.array(dc.get_articulation_dof_position_targets(art),dtype=np.float32)
+        dof_vel = np.array(dc.get_articulation_dof_velocity_targets(art),dtype=np.float32)
         print("dof_pos & dof_vel:", dof_pos, dof_vel)
 
         # rotation * 速度的到实际base 线速度？ 数据类型是否满足？

@@ -3,10 +3,22 @@ import omni.kit.commands
 from pxr import UsdLux, Sdf, Gf, UsdPhysics, PhysicsSchemaTools, PhysxSchema
 import numpy as np
 
-stage = omni.usd.get_context().get_stage()
 
+joint_limits = {
+    "left_back_shoulder_joint":(-90,90),
+    "left_front_shoulder_joint":(-90,90),
+    "right_back_shoulder_joint":(-90,90),
+    "right_front_shoulder_joint":(-90,90),
+    "left_back_knee_joint":(-90,90),
+    "left_front_knee_joint":(-90,90),
+    "right_back_knee_joint":(-90,90),
+    "right_front_knee_joint":(-90,90),
+}
+
+stage = omni.usd.get_context().get_stage()
 joint_paths = []
-for quadrant in ["left_front", "left_back", "right_front", "right_back"]:
+
+for quadrant in ["left_back", "left_front", "right_back", "right_front"]:
     for component, sub in [("shoulder_link", "knee")]:
         joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
     joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
@@ -21,6 +33,10 @@ for joint_path in joint_paths:
     drive.GetStiffnessAttr().Set(400)
     drive.GetMaxForceAttr().Set(1000)
 
+    revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"/bittle/{joint_path}")
+    joint = joint_path.split("/")[-1]
+    revoluteJoint.CreateLowerLimitAttr().Set(joint_limits[joint][0])
+    revoluteJoint.CreateUpperLimitAttr().Set(joint_limits[joint][1])
 
 curr_prim = stage.GetPrimAtPath("/bittle")
 for link_prim in curr_prim.GetChildren():
@@ -43,3 +59,4 @@ for link_prim in curr_prim.GetChildren():
         ### Alternatively set the density
         #mass_api.CreateDensityAttr(1000)
         #mass_api.GetDensityAttr().Set(0.0)
+

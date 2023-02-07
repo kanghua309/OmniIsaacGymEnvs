@@ -95,7 +95,7 @@ class BittleTask(RLTask):
             self.rew_scales[key] *= self.dt
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._bittle_translation = torch.tensor([0.0, 0.0, 1.06])
+        self._bittle_translation = torch.tensor([0.0, 0.0, 1.08])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         self._num_observations = 36 #FIX 观察指标： lin vel :3 + ang vel :3 + gravity :3 + commands : 3  + dof pos  ：8 + dof vel   : 8 + actions ： 8个
         self._num_actions = 8 #FIX - 和8个关节相关

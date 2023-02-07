@@ -96,7 +96,7 @@ class BittleTask(RLTask):
             self.rew_scales[key] *= self.dt
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._bittle_translation = torch.tensor([0.0, 0.0, 1.08]) #FIX IT
+        self._bittle_translation = torch.tensor([0.0, 0.0, 0.62]) #FIX IT
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         self._num_observations = 36
         self._num_actions = 8

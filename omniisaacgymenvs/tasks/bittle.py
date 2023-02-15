@@ -286,8 +286,8 @@ class BittleTask(RLTask):
         self.last_dof_vel[:] = dof_vel[:]
 
         #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0)
-        self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, ground_heights=0.0)
-
+        #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, ground_heights=0.0)
+        self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.9)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 

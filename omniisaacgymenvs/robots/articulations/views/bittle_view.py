@@ -30,15 +30,50 @@ from typing import Optional
 
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
+import torch
+
+# def quaternion_to_euler(x, y, z, w):
+
+#         import math
+#         t0 = +2.0 * (w * x + y * z)
+#         t1 = +1.0 - 2.0 * (x * x + y * y)
+#         X = math.degrees(math.atan2(t0, t1))
+
+#         t2 = +2.0 * (w * y - z * x)
+#         t2 = +1.0 if t2 > +1.0 else t2
+#         t2 = -1.0 if t2 < -1.0 else t2
+#         Y = math.degrees(math.asin(t2))
+
+#         t3 = +2.0 * (w * z + x * y)
+#         t4 = +1.0 - 2.0 * (y * y + z * z)
+#         Z = math.degrees(math.atan2(t3, t4))
+
+#         return X, Y, Z
+import math
+import numpy as np
+
+
+def quaternion_to_euler(x, y, z, w):
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + y * y)
+    roll = math.atan2(t0, t1)
+    t2 = +2.0 * (w * y - z * x)
+    t2 = +1.0 if t2 > +1.0 else t2
+    t2 = -1.0 if t2 < -1.0 else t2
+    pitch = math.asin(t2)
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (y * y + z * z)
+    yaw = math.atan2(t3, t4)
+    return [yaw, pitch, roll]
 
 
 class BittleView(ArticulationView):
     def __init__(
-        self,
-        prim_paths_expr: str,
-        name: Optional[str] = "BittleView",
-        track_contact_forces=False,
-        prepare_contact_sensors=False
+            self,
+            prim_paths_expr: str,
+            name: Optional[str] = "BittleView",
+            track_contact_forces=False,
+            prepare_contact_sensors=False
     ) -> None:
         """[summary]
         """
@@ -49,9 +84,13 @@ class BittleView(ArticulationView):
             reset_xform_properties=False
         )
         self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/bittle/.*_shoulder_*",
-            name="knees_view", reset_xform_properties=False, track_contact_forces=track_contact_forces, prepare_contact_sensors=prepare_contact_sensors)
+                                    name="knees_view", reset_xform_properties=False,
+                                    track_contact_forces=track_contact_forces,
+                                    prepare_contact_sensors=prepare_contact_sensors)
         self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/bittle/base_frame_link",
-            name="base_view", reset_xform_properties=False, track_contact_forces=track_contact_forces, prepare_contact_sensors=prepare_contact_sensors)
+                                   name="base_view", reset_xform_properties=False,
+                                   track_contact_forces=track_contact_forces,
+                                   prepare_contact_sensors=prepare_contact_sensors)
 
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
@@ -61,10 +100,22 @@ class BittleView(ArticulationView):
         knee_heights = knee_pos.view((-1, 4, 3))[:, :, 2]
         if ground_heights is not None:
             knee_heights -= ground_heights
-        return (knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (knee_heights[:, 2] < threshold) | (knee_heights[:, 3] < threshold)
+        return (knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (
+                    knee_heights[:, 2] < threshold) | (knee_heights[:, 3] < threshold)
 
     def is_base_below_threshold(self, threshold, ground_heights):
-        base_pos, _ = self.get_world_poses()
+        base_pos, _ = self._base.get_world_poses()
         base_heights = base_pos[:, 2]
         base_heights -= ground_heights
         return (base_heights[:] < threshold)
+
+    def is_orientation_below_threshold(self, threshold):
+        _, base_orientation = self._base.get_world_poses()
+        x = base_orientation[:, 1]
+        y = base_orientation[:, 2]
+        z = base_orientation[:, 3]
+        w = base_orientation[:, 0]
+        # print("orient:",x,y)
+        ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+        # print(a)
+        return (ang[0] > threshold) | (ang[0] < -1 * threshold) | (ang[1] > threshold) | (ang[1] < -1 * threshold)

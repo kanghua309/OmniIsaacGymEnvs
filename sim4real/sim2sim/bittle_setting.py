@@ -3,16 +3,15 @@ import omni.kit.commands
 from pxr import UsdLux, Sdf, Gf, UsdPhysics, PhysicsSchemaTools, PhysxSchema
 import numpy as np
 
-
 joint_limits = {
-    "left_back_shoulder_joint":(-90,90),
-    "left_front_shoulder_joint":(-90,90),
-    "right_back_shoulder_joint":(-90,90),
-    "right_front_shoulder_joint":(-90,90),
-    "left_back_knee_joint":(-90,90),
-    "left_front_knee_joint":(-90,90),
-    "right_back_knee_joint":(-90,90),
-    "right_front_knee_joint":(-90,90),
+    "left_back_shoulder_joint":(-40,40),
+    "left_front_shoulder_joint":(-40,40),
+    "right_back_shoulder_joint":(-40,40),
+    "right_front_shoulder_joint":(-40,40),
+    "left_back_knee_joint":(-40,0),
+    "left_front_knee_joint":(-40,0),
+    "right_back_knee_joint":(0,40),
+    "right_front_knee_joint":(0,40),
 }
 
 stage = omni.usd.get_context().get_stage()

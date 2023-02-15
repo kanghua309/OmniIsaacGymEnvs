@@ -74,6 +74,34 @@ B.6 动作快慢问题
     damping: 4.0     # [N*m*s/rad]
     actionScale: 13.5。— 这个值越大则动作越快 ！！！  10- 300？
   快慢含义还不清楚
+  但效果似乎默认值最好
+
+B.7 关节幅度问题 - 减少关节幅度，应该降低了搜索空间，便于学习
+joint_limits = {
+    "left_back_shoulder_joint":(-40,40),
+    "left_front_shoulder_joint":(-40,40),
+    "right_back_shoulder_joint":(-40,40),
+    "right_front_shoulder_joint":(-40,40),
+    "left_back_knee_joint":(-40,0),
+    "left_front_knee_joint":(-40,0),
+    "right_back_knee_joint":(0,40),
+    "right_front_knee_joint":(0,40),
+}
+
+B.8 关于摔倒判断，使用角度判断，比高度更合适
+  def is_orientation_below_threshold(self, threshold):
+        _, base_orientation = self._base.get_world_poses()
+        x = base_orientation[:, 1]
+        y = base_orientation[:, 2]
+        z = base_orientation[:, 3]
+        w = base_orientation[:, 0]
+        # print("orient:",x,y)
+        ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+        # print(a)
+        return (ang[0] > threshold) | (ang[0] < -1 * threshold) | (ang[1] > threshold) | (ang[1] < -1 * threshold)
+
+B.9
+
 
 C 参考资料
 anymal社区

@@ -100,7 +100,9 @@ B.8 关于摔倒判断，使用角度判断，比高度更合适
         # print(a)
         return (ang[0] > threshold) | (ang[0] < -1 * threshold) | (ang[1] > threshold) | (ang[1] < -1 * threshold)
 
-B.9
+B.9 bittle 的改造
+    joint 的动力学参数改造
+    rid
 
 
 C 参考资料

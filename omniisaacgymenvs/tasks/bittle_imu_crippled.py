@@ -94,7 +94,7 @@ class BittleIMUTask(RLTask):
             self.rew_scales[key] *= self.dt
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._bittle_translation = torch.tensor([0.0, 0.0, 1.06])
+        self._bittle_translation = torch.tensor([0.0, 0.0, 1.08])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         self._num_observations = 36 #FIX 观察指标： lin vel :3 + ang vel :3 + gravity :3 + commands : 3  + dof pos  ：8 + dof vel   : 8 + actions ： 8个
         self._num_actions = 8 #FIX - 和8个关节相关
@@ -120,7 +120,7 @@ class BittleIMUTask(RLTask):
         #FIX IT
         bittle.set_anymal_properties(self._stage, bittle.prim)
         bittle.prepare_contacts(self._stage, bittle.prim)
-        #FIX IT - 加入imu ？？
+        #FIX IT - 动态加入imu ？？
         from omni.isaac.imu_sensor import _imu_sensor
         import carb
         self._is = _imu_sensor.acquire_imu_sensor_interface()
@@ -128,7 +128,7 @@ class BittleIMUTask(RLTask):
         props.position = carb.Float3(0, 0, 0)
         props.orientation = carb.Float4(0, 0, 0, 1)
         #props.sensorPeriod = 1 / 2000 #？？？
-        self._is.add_sensor_on_body(self.default_zero_env_path + "/bittle" + "/base_link", props)
+        self._is.add_sensor_on_body(self.default_zero_env_path + "/bittle" + "/base_link", props)#安装到 imu_link上 ？
 
         # Configure joint properties
         joint_paths = []
@@ -148,7 +148,7 @@ class BittleIMUTask(RLTask):
             stage = get_current_stage()
             revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"{bittle.prim_path}/{joint_path}") #FIX IT
             revoluteJoint.GetLowerLimitAttr().Set(-60.0)
-            revoluteJoint.GetUpperLimitAttr().Set(60.0) #FIX
+            revoluteJoint.GetUpperLimitAttr().Set(60.0) #FIX IT
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
         dof_names = bittle.dof_names
@@ -157,25 +157,23 @@ class BittleIMUTask(RLTask):
             angle = self.named_default_joint_angles[name]
             self.default_dof_pos[:, i] = angle
 
-
-
     def get_observations(self) -> dict:
-        #FIX IT
-        reading = self._is.get_sensor_sim_reading(self.default_zero_env_path + "/bittle" + "/base_link")  # 读当前针的树枝
+        #FIX IT sensor_readings = robots._physics_view.get_force_sensor_forces()
+        reading = self._is.get_sensor_sim_reading(self.default_zero_env_path + "/bittle" + "/base_link")  # 读当前针的树枝 FIX IT
         torso_rotation = reading.orientation
         #torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
         #root_velocities = self._bittles.get_velocities(clone=False)
         dof_pos = self._bittles.get_joint_positions(clone=False)
-        dof_vel = self._bittles.get_joint_velocities(clone=False) #FIX 速度是否恒定？
+        #dof_vel = self._bittles.get_joint_velocities(clone=False) #FIX 速度是否恒定？
+        # velocity = np.array([reading.lin_acc_x * self.dt, reading.lin_acc_y * self.dt, reading.lin_acc_z * self.dt])
+        # ang_velocity = np.array([reading.ang_vel_x,reading.ang_vel_y,reading.ang_vel_z])
+        #
+        # base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
+        # base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
+        # projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
 
-        velocity = np.array([reading.lin_acc_x * self.dt, reading.lin_acc_y * self.dt, reading.lin_acc_z * self.dt])
-        ang_velocity = np.array([reading.ang_vel_x,reading.ang_vel_y,reading.ang_vel_z])
-
-        base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
-        base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
-        projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
+        ang_velocity = torch.tensor([reading.ang_vel_x, reading.ang_vel_y, reading.ang_vel_z])
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
-
         commands_scaled = self.commands * torch.tensor(
             [self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
             requires_grad=False,
@@ -184,12 +182,13 @@ class BittleIMUTask(RLTask):
 
         obs = torch.cat(
             (
-                base_lin_vel,
-                base_ang_vel,
-                projected_gravity,
+                # base_lin_vel,
+                # base_ang_vel,
+                # projected_gravity,
                 commands_scaled,
+                ang_velocity,
                 dof_pos_scaled,
-                dof_vel * self.dof_vel_scale,
+                # dof_vel * self.dof_vel_scale,
                 self.actions,
             ),
             dim=-1,

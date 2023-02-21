@@ -44,7 +44,7 @@ async def my_task():
     for i in range(100):
         try:
             #posvec = np.load("C:\\Users\\Administrator\\SynologyDrive\\sim4real\\sim2sim\\bittle_posvec.npy")
-            posvec = np.array([30,30,-30,-30,-40,-40,40,40])
+            posvec = np.array([30, 40, -30, -40, -40, -60, 40, 60])
             posvec = posvec/180.0 * 3.14
             for joint, pos in zip(JOINTS, posvec):
                 dof_ptr = dc.find_articulation_dof(art,joint)

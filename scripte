@@ -5,7 +5,7 @@ PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.confi
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
 
 测试bittle
-PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+PYTHON_PATH scripts\rlgames_train.py task=Bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs\Bittle\nn\Bittle.pth
 问题：这么多bittle,表现不同，要人工选择吗？
 
 查看训练性能
@@ -31,9 +31,14 @@ PYTHON_PATH scripts/infer_udp_test.py task=Cartpole test=True checkpoint="runs\C
 
 bittle 模拟过程
 - 训练bittle
+only one
+PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=1 headless=false train.params.config.minibatch_size=16 train.params.config.horizon_length=16
+muti
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
 - 测试训练效果
 PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=1 train.params.config.minibatch_size=1 train.params.config.horizon_length=1 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+
+
 
 - 执行bittle 参数设置
 isaac sim 中载入bittle usd，在script editor 中执行

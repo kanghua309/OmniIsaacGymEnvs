@@ -98,7 +98,7 @@ class BittleTask(RLTask):
         self._bittle_translation = torch.tensor([0.0, 0.0, 1.08])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         #self._num_observations = 268 #FIX 观察指标： lin vel:3 + ang vel:3 + gravity:3 + commands:3  ++  dof_pos：8 + dof_vel:8  ++ actions:8 * 30 = 268
-        self._num_observations = 266 #FIX 观察指标：rotations:3 + commands:3  + ang vel:3  +   dof_pos：8  ++ actions:8 * 30 = 254 + actions:8
+        self._num_observations = 262 #FIX 观察指标：rotations:3 + commands:3  +  dof_pos：8  ++ actions:8 * 30 = 254 + actions:8
         self._num_actions = 8 #FIX - 和8个关节相关
 
         RLTask.__init__(self, name, env)
@@ -140,15 +140,16 @@ class BittleTask(RLTask):
             self.default_dof_pos[:, i] = angle
 
     def get_observations(self) -> dict:
-        torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
+        #torso_position, torso_rotation = self._bittles.get_world_poses(clone=False)
+        ratation_angs = self._bittles.get_euler_positions()
         root_velocities = self._bittles.get_velocities(clone=False)
         dof_pos = self._bittles.get_joint_positions(clone=False)
         # dof_vel = self._bittles.get_joint_velocities(clone=False)
         # velocity = root_velocities[:, 0:3]
-        ang_velocity = root_velocities[:, 3:6]
+        # ang_velocity = root_velocities[:, 3:6]
         # base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
-        base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
-        #projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
+        # base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
+        # projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         # dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
         commands_scaled = self.commands * torch.tensor(
             [self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
@@ -156,20 +157,28 @@ class BittleTask(RLTask):
             device=self.commands.device,
         )
         #FIX IT
-        reset_env_ids = torch.remainder(self.progress_buf, 2).nonzero(as_tuple=False).squeeze(-1)
-        if len(reset_env_ids) > 0:
-            _histories  = self.jointAngles_histories[reset_env_ids].cpu().detach().numpy()
-            _targets = dof_pos[reset_env_ids].cpu().detach().numpy()
-            #print(_histories.shape,_acts.shape)
-            _histories_new = np.append(_histories,_targets, axis=1)
-            self.jointAngles_histories[reset_env_ids] = torch.Tensor(np.delete(_histories_new,np.s_[0:8], axis=1)).cuda()
+        _histories  = self.jointAngles_histories.cpu().detach().numpy()
+        _targets = dof_pos.cpu().detach().numpy()
+        #print(_histories.shape,_acts.shape)
+        _histories_new = np.append(_histories,_targets, axis=1)
+        self.jointAngles_histories = torch.Tensor(np.delete(_histories_new, np.s_[0:8], axis=1)).cuda()
         # #print(self.jointAngles_histories)
         #print(self.jointAngles_histories.shape)
+        flush_env_ids = torch.remainder(self.progress_buf, 2).nonzero(as_tuple=False).squeeze(-1)
+        if len(flush_env_ids) > 0:
+            print("flush_env_ids:",flush_env_ids)
+            _histories  = self.jointAngles_histories[flush_env_ids].cpu().detach().numpy()
+            _targets = dof_pos[flush_env_ids].cpu().detach().numpy()
+            #print(_histories.shape,_acts.shape)
+            _histories_new = np.append(_histories,_targets, axis=1)
+            self.jointAngles_histories[flush_env_ids] = torch.Tensor(np.delete(_histories_new,np.s_[0:8], axis=1)).cuda()
+
+        #print(ratation_angs)
         obs = torch.cat(
             (
                 #base_lin_vel,
-                torso_rotation,
-                base_ang_vel,
+                ratation_angs,
+                #base_ang_vel,
                 #projected_gravity,
                 commands_scaled,
                 #ang_velocity * self.ang_vel_scale,
@@ -214,7 +223,7 @@ class BittleTask(RLTask):
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
         # randomize DOF velocities
-        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._bittles.num_dof), device=self._device)
+        velocities = torch_rand_float(-0.1, 0.1, (num_resets, self._bittles.num_dof), device=self._device) #
         dof_pos = self.default_dof_pos[env_ids]
         dof_vel = velocities
 
@@ -249,9 +258,7 @@ class BittleTask(RLTask):
         # FIX IT
         #print("?1:",self.jointAngles_histories[env_ids])
         self.jointAngles_histories[env_ids] = 0.
-        self.last_positions[env_ids] = 0.
         #print("?2:",self.jointAngles_histories[env_ids])
-
 
     def post_reset(self):
         self.initial_root_pos, self.initial_root_rot = self._bittles.get_world_poses()
@@ -276,14 +283,15 @@ class BittleTask(RLTask):
         )
         self.last_dof_vel = torch.zeros((self._num_envs, 8), dtype=torch.float, device=self._device, requires_grad=False)
         self.last_actions = torch.zeros(self._num_envs, self.num_actions, dtype=torch.float, device=self._device, requires_grad=False)
-        self.last_positions = torch.zeros(self._num_envs, 3, dtype=torch.float, device=self._device, requires_grad=False)
 
         self.time_out_buf = torch.zeros_like(self.reset_buf)
+
 
         #FIX IT
         self.jointAngles_histories = torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], device=self._device).repeat(
             (self._num_envs, 30)
         )
+
 
         # randomize all envs
         indices = torch.arange(self._bittles.count, dtype=torch.int64, device=self._device)
@@ -295,36 +303,31 @@ class BittleTask(RLTask):
         dof_pos = self._bittles.get_joint_positions(clone=False)
         dof_vel = self._bittles.get_joint_velocities(clone=False)
 
-        # velocity = root_velocities[:, 0:3]
-        # ang_velocity = root_velocities[:, 3:6]
+        velocity = root_velocities[:, 0:3]
+        ang_velocity = root_velocities[:, 3:6]
 
-        # base_lin_vel = quat_rotate_inverse(torso_rotation, velocity)
-        # base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
+        base_lin_vel = quat_rotate_inverse(torso_rotation, velocity)
+        base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
 
         # velocity tracking reward
-        # lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - base_lin_vel[:, :2]), dim=1)
-        # ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
-        # rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
-        # rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
-        #
-        # rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
-        # rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"] #FIX IT
-        # rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        # rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
-        #
-        # total_reward = rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_lin_vel_z
-        # print("reward-:", rew_lin_vel_xy,  rew_lin_vel_z, rew_joint_acc, rew_action_rate, rew_cosmetic, rew_ang_vel_z)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - base_lin_vel[:, :2]), dim=1)
+        ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
+        rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
+        rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"] #FIX IT
+        rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
 
-        current_positions = torso_position[:,0]
-        last_positions = self.last_positions[:,0]
-        state_robot_ang_roll = self._bittles.get_euler_positions()
-        total_reward = 1.0 * torch.sum((current_positions - last_positions)) * 1000 - \
-                       torch.abs(state_robot_ang_roll) * 1.0
+        #print("-:", base_lin_vel[:, :2],lin_vel_error, rew_lin_vel_xy, base_lin_vel[:, 2], rew_lin_vel_z)
+
+        rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
+        rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
+        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
+
+        total_reward = rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_lin_vel_z
+        #print("reward-:", rew_lin_vel_xy,  rew_lin_vel_z, rew_joint_acc, rew_action_rate)
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
-        self.last_positions[:] = torso_position[:]
 
         #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0)
         #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, #ground_heights=0.0)

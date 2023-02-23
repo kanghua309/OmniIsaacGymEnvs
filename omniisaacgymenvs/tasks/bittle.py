@@ -317,7 +317,7 @@ class BittleTask(RLTask):
         current_positions = torso_position[:,0]
         last_positions = self.last_positions[:,0]
         state_robot_ang_roll = self._bittles.get_euler_positions()
-        total_reward = 1.0 * torch.sum((current_positions - last_positions)) * 1.0 - \
+        total_reward = 1.0 * torch.sum((current_positions - last_positions)) * 1000 - \
                        torch.abs(state_robot_ang_roll) * 1.0
         total_reward = torch.clip(total_reward, 0.0, None)
 

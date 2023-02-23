@@ -129,7 +129,7 @@ class BittleTask(RLTask):
                 joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
             joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
+            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 1300, 0, 1000)
 
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device, requires_grad=False)
@@ -157,7 +157,7 @@ class BittleTask(RLTask):
         )
         #FIX IT
         _histories  = self.jointAngles_histories.cpu().detach().numpy()
-        _targets = self.current_targets.cpu().detach().numpy()
+        _targets = dof_pos.cpu().detach().numpy()
         #print(_histories.shape,_acts.shape)
         _histories_new = np.append(_histories,_targets, axis=1)
         self.jointAngles_histories = torch.Tensor(np.delete(_histories_new, np.s_[0:8], axis=1)).cuda()
@@ -197,15 +197,16 @@ class BittleTask(RLTask):
 
         indices = torch.arange(self._bittles.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        #current_targets = self.current_targets + self.action_scale * self.actions * self.dt
+        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
         #FIX IT
         #print("self.bittle_dof_lower_limits:",self.bittle_dof_lower_limits)
         #print("self.bittle_dof_upper_limits:",self.bittle_dof_upper_limits)
-
         #print("self.actions:",self.actions)
-        ds = np.deg2rad(15)
-        current_targets = self.current_targets + self.actions
+        #print("self.current_targets1:",self.current_targets)
+        #ds = np.deg2rad(15)
+        #current_targets = self.current_targets + self.actions * ds
         self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits, self.bittle_dof_upper_limits)
+        #print("self.current_targets2:",self.current_targets)
         self._bittles.set_joint_position_targets(self.current_targets, indices)
 
     def reset_idx(self, env_ids):
@@ -224,7 +225,6 @@ class BittleTask(RLTask):
         self._bittles.set_joint_positions(dof_pos, indices)
         #FIX IT?
         self._bittles.set_joint_velocities(dof_vel, indices)
-
         self._bittles.set_world_poses(self.initial_root_pos[env_ids].clone(), self.initial_root_rot[env_ids].clone(), indices)
         self._bittles.set_velocities(root_vel, indices)
 
@@ -305,11 +305,12 @@ class BittleTask(RLTask):
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
 
         rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
-        rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
+        rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"] #FIX IT
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"]
+        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
 
         total_reward = rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_lin_vel_z
+        print("reward-:", rew_lin_vel_xy,  rew_lin_vel_z, rew_joint_acc, rew_action_rate, rew_cosmetic, rew_ang_vel_z)
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
@@ -317,7 +318,7 @@ class BittleTask(RLTask):
 
         #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0)
         #self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, #ground_heights=0.0)
-        self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.3) | self._bittles.is_base_below_threshold(threshold=0.90, ground_heights=0.0)
+        self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.40)|self._bittles.is_knee_below_threshold(threshold=0.2, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 

@@ -34,9 +34,11 @@ bittle 模拟过程
 only one
 PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=1 headless=false train.params.config.minibatch_size=16 train.params.config.horizon_length=16
 muti
-PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
+PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=4096 train.params.config.minibatch_size=32768 train.params.config.horizon_length=24 headless=true
 - 测试训练效果
-PYTHON_PATH scripts\rlgames_train.py task=bittle num_envs=1 train.params.config.minibatch_size=1 train.params.config.horizon_length=1 test=true checkpoint=runs\Bittle\nn\Bittle.pth
+PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=1 train.params.config.minibatch_size=16 train.params.config.horizon_length=16 test=true checkpoint=runs/Bittle/nn/Bittle.pth
+- 测试向前走效果
+PYTHON_PATH scripts/rlgames_infer_test.py task=Bittle test=True checkpoint="runs/Bittle/nn/Bittle.pth" headless=False num_envs=1 max_iterations=10
 
 
 

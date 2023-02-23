@@ -93,23 +93,23 @@ class RLGTrainer():
         num_steps = 0
 
         is_done = False
-        obs = agent.obs_to_torch(obs)
+        #obs = agent.obs_to_torch(obs)
         print("max_iterations:",self.cfg.max_iterations)
         print("Obs Initialize:", obs)
         for i in range(self.cfg.max_iterations):
             is_done = False
             while not is_done:
-                print("Obs 0:", obs)
-                #for bittle 向前走 所以给y 为2
-                # obs['obs'][:, 9] = 0.0
-                # obs['obs'][:, 10] = 1.0
-                # obs['obs'][:, 11] = 0.0
+                #print("Obs 0:", obs)
                 obs = agent.obs_to_torch(obs)
-                print("Obs 1:", obs)
+                #for bittle 向前走 所以给y 为2
+                obs[:, 3] = 0.0
+                obs[:, 4] = 2.0
+                obs[:, 5] = 0.0
+                #print("Obs 1:", obs)
                 act = agent.get_action(obs)
-                print("Act:", act)
+                #print("Act:", act)
                 obs, reward, is_done, info = env.step(act.unsqueeze(0))
-                print("Obs 2:", obs)
+                #print("Obs 2:", obs)
                 total_reward += reward.item()
                 num_steps += 1
                 print('num_steps: ', num_steps)

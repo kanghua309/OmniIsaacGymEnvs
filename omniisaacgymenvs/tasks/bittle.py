@@ -157,13 +157,6 @@ class BittleTask(RLTask):
             device=self.commands.device,
         )
         #FIX IT
-        _histories  = self.jointAngles_histories.cpu().detach().numpy()
-        _targets = dof_pos.cpu().detach().numpy()
-        #print(_histories.shape,_acts.shape)
-        _histories_new = np.append(_histories,_targets, axis=1)
-        self.jointAngles_histories = torch.Tensor(np.delete(_histories_new, np.s_[0:8], axis=1)).cuda()
-        # #print(self.jointAngles_histories)
-        #print(self.jointAngles_histories.shape)
         flush_env_ids = torch.remainder(self.progress_buf, 2).nonzero(as_tuple=False).squeeze(-1)
         if len(flush_env_ids) > 0:
             print("flush_env_ids:",flush_env_ids)

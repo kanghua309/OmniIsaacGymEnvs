@@ -118,4 +118,14 @@ class BittleView(ArticulationView):
         # print("orient:",x,y)
         ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
         # print(a)
-        return (ang[0] > threshold) | (ang[0] < -1 * threshold) | (ang[1] > threshold) | (ang[1] < -1 * threshold)
+        return (ang[2] > threshold) | (ang[2] < -1 * threshold) | (ang[1] > threshold) | (ang[1] < -1 * threshold)
+
+
+    def get_euler_positions(self):
+        torso_position, torso_rotation = self.get_world_poses(clone=False)
+        x = torso_rotation[:, 1]
+        y = torso_rotation[:, 2]
+        z = torso_rotation[:, 3]
+        w = torso_rotation[:, 0]
+        ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+        return ang[2]

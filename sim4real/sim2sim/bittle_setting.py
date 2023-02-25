@@ -8,11 +8,12 @@ joint_limits = {
     "left_front_shoulder_joint":(-40,40),
     "right_back_shoulder_joint":(-40,40),
     "right_front_shoulder_joint":(-40,40),
-    "left_back_knee_joint":(-60,0),
-    "left_front_knee_joint":(-60,0),
-    "right_back_knee_joint":(0,60),
-    "right_front_knee_joint":(0,60),
+    "left_back_knee_joint":(-90,-50),
+    "left_front_knee_joint":(-90,-50),
+    "right_back_knee_joint":(50,90),
+    "right_front_knee_joint":(50,90),
 }
+
 
 stage = omni.usd.get_context().get_stage()
 joint_paths = []
@@ -28,9 +29,9 @@ for joint_path in joint_paths:
     # drive.GetTargetVelocityAttr().Set(30)
     # drive.GetTargetPositionAttr().Set(1)
     drive.GetTargetPositionAttr().Set(0)
-    drive.GetDampingAttr().Set(40)
-    drive.GetStiffnessAttr().Set(400)
-    drive.GetMaxForceAttr().Set(1000)
+    drive.GetDampingAttr().Set(0)
+    drive.GetStiffnessAttr().Set(1300)
+    drive.GetMaxForceAttr().Set(10000) #感觉是关节软硬！ 小于xxxx 打滑
 
     revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"/bittle/{joint_path}")
     joint = joint_path.split("/")[-1]
@@ -54,8 +55,7 @@ for link_prim in curr_prim.GetChildren():
         print("link_prim 3:", link_prim)
         mass_api = UsdPhysics.MassAPI.Apply(link_prim)
         #mass_api.CreateMassAttr(10)
-        #mass_api.GetMassAttr().Set(0.0)
+        mass_api.GetMassAttr().Set(0.0)
         ### Alternatively set the density
         #mass_api.CreateDensityAttr(1000)
-        #mass_api.GetDensityAttr().Set(0.0)
-
+        mass_api.GetDensityAttr().Set(0.0)

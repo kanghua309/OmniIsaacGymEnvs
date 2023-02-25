@@ -51,6 +51,11 @@ import torch
 #         return X, Y, Z
 import math
 import numpy as np
+
+#roll：绕x轴
+#pitch：绕y轴
+#yaw：绕z轴
+
 def quaternion_to_euler(x, y, z, w):
     #print(x)
     t0 = +2.0 * (w * x + y * z)
@@ -68,7 +73,7 @@ def quaternion_to_euler(x, y, z, w):
     t4 = +1.0 - 2.0 * (y * y + z * z)
     yaw = torch.atan2(t3, t4)
     #print(yaw,pitch,roll)
-    return torch.stack([yaw, pitch, roll],dim=0).T
+    return torch.stack([roll, pitch, yaw],dim=0).T
 
 class BittleView(ArticulationView):
     def __init__(
@@ -117,7 +122,7 @@ class BittleView(ArticulationView):
         #print("orient:",x,y)
         ang = quaternion_to_euler(x,y,z,w)
         #print("ang:",ang)
-        return (ang[:,1] > threshold) | (ang[:,1] < -1 * threshold) | (ang[:,2] > threshold) | (ang[:,2] < -1* threshold)
+        return (ang[:,1] > threshold) | (ang[:,1] < -1 * threshold) | (ang[:,0] > threshold) | (ang[:,0] < -1* threshold)
 
     def get_euler_positions(self):
         torso_position, torso_rotation = self.get_world_poses(clone=False)

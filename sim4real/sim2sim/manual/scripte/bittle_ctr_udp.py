@@ -74,8 +74,8 @@ def move(currentvec,targetvec, increment = 0.01):
             print("posvec:",posvec)
             #send it
             s.sendto(posvec.tostring(),address)
-            data, addr = s.recvfrom(4096)
-            print('[Recieved] {} {}'.format(np.fromstring(data,np.float32),addr))
+            #data, addr = s.recvfrom(4096)
+            #print('[Recieved] {} {}'.format(np.fromstring(data,np.float32),addr))
 
 
         #np.save("bittle_posvec.npy",posvec)

@@ -3,16 +3,31 @@ import omni.kit.commands
 from pxr import UsdLux, Sdf, Gf, UsdPhysics, PhysicsSchemaTools, PhysxSchema
 import numpy as np
 
+# joint_limits = {
+#     "left_back_shoulder_joint":(-40,40),
+#     "left_front_shoulder_joint":(-40,40),
+#     "right_back_shoulder_joint":(-40,40),
+#     "right_front_shoulder_joint":(-40,40),
+#     "left_back_knee_joint":(-90,-50),
+#     "left_front_knee_joint":(-90,-50),
+#     "right_back_knee_joint":(50,90),
+#     "right_front_knee_joint":(50,90),
+# }
+
 joint_limits = {
-    "left_back_shoulder_joint":(-40,40),
-    "left_front_shoulder_joint":(-40,40),
-    "right_back_shoulder_joint":(-40,40),
-    "right_front_shoulder_joint":(-40,40),
-    "left_back_knee_joint":(-90,-50),
-    "left_front_knee_joint":(-90,-50),
-    "right_back_knee_joint":(50,90),
-    "right_front_knee_joint":(50,90),
+    "left_back_shoulder_joint":(-75,0),
+    "left_front_shoulder_joint":(0,75),
+    "right_back_shoulder_joint":(0,75),
+    "right_front_shoulder_joint":(-75,0),
+    "left_back_knee_joint":(75,90),
+    "left_front_knee_joint":(-90,-75),
+    "right_back_knee_joint":(-90,-75),
+    "right_front_knee_joint":(75,90),
 }
+
+
+
+
 
 
 stage = omni.usd.get_context().get_stage()
@@ -31,7 +46,7 @@ for joint_path in joint_paths:
     drive.GetTargetPositionAttr().Set(0)
     drive.GetDampingAttr().Set(0)
     drive.GetStiffnessAttr().Set(1300)
-    drive.GetMaxForceAttr().Set(10000) #感觉是关节软硬！ 小于xxxx 打滑
+    drive.GetMaxForceAttr().Set(5000) #感觉是关节软硬！ 小于xxxx 打滑
 
     revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"/bittle/{joint_path}")
     joint = joint_path.split("/")[-1]

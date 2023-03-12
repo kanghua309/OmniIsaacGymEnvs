@@ -69,6 +69,7 @@ class BittleTask(RLTask):
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
+        self.rew_scales["energy_cost"] = self._task_cfg["env"]["learn"]["energyCostScale"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -135,7 +136,7 @@ class BittleTask(RLTask):
                 joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
             joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 2500)  # FIX IT 2500 最好？
+            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 2500)  # FIX IT
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device,
                                            requires_grad=False)
@@ -366,12 +367,12 @@ class BittleTask(RLTask):
 
         # print("torques3:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
         energy_cost = torch.diag(torch.abs(torch.mm(torques, dof_vel.T)))
-        rew_energy_cost = torch.exp(-energy_cost / 0.25) * -1.0
+        rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]
         # print(":",rew_energy_cost)
         ###############################################################################################
         # print("K:",lin_vel_error,rew_lin_vel_xy,rew_energy_cost,rew_energy_cost)
 
-        total_reward = rew_lin_vel_xy + rew_action_rate + rew_lin_vel_z + rew_ang_vel_z + rew_joint_acc  # + rew_energy_cost
+        total_reward = rew_lin_vel_xy + rew_action_rate + rew_lin_vel_z + rew_ang_vel_z + rew_joint_acc + rew_energy_cost
         # total_reward = rew_lin_vel_xy + rew_energy_cost
         # print("total:",self._bittles.get_euler_positions())
         # total_reward = 1.0 * (current_positions_y - last_positions_y) * 1 + rew_energy_cost

@@ -10,10 +10,10 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  controlFrequencyInv: 2
+  controlFrequencyInv: 10 #FIX IT 10HZ
 
   baseInitState:
-    pos: [0.0, 0.0, 1.08] # x,y,z [m]  1.08 好像是bittle  base 的高度？
+    pos: [0.0, 0.0, 1.06] # x,y,z [m]  1.08 好像是bittle  base 的高度？
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -32,15 +32,15 @@ env:
   defaultJointAngles:  # = target angles when action = 0.0
 
     #顺序不要乱动！！！
-    left_back_shoulder_joint: 0.72       # [rad] <-
-    left_front_shoulder_joint: 0.52      # [rad] <-
-    right_back_shoulder_joint: -0.72     # [rad] <-
-    right_front_shoulder_joint: -0.52    # [rad] <-
+    left_back_shoulder_joint: 0.523       # [rad] <-
+    left_front_shoulder_joint: 0.623      # [rad] <-
+    right_back_shoulder_joint: -0.523     # [rad] <-
+    right_front_shoulder_joint: -0.623    # [rad] <-
 
-    left_back_knee_joint: -1.27         # [rad] ->
-    left_front_knee_joint: -1.27        # [rad] ->
-    right_back_knee_joint: 1.27         # [rad] ->
-    right_front_knee_joint: 1.27        # [rad] ->
+    left_back_knee_joint: -1.047        # [rad] ->
+    left_front_knee_joint: -1.047        # [rad] ->
+    right_back_knee_joint: 1.047         # [rad] ->
+    right_front_knee_joint: 1.047        # [rad] ->
 
   learn:
     # rewards
@@ -50,6 +50,8 @@ env:
     jointAccRewardScale: -0.0006 #FIX
     actionRateRewardScale: -0.006
     cosmeticRewardScale: -0.00 #FIX
+    energyCostScale: -0.05
+
 
     # normalization
     linearVelocityScale: 2.0

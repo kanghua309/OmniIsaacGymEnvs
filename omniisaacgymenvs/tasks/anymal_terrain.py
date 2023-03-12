@@ -201,7 +201,7 @@ class AnymalTerrainTask(RLTask):
 
     def get_terrain(self):
         self.env_origins = torch.zeros((self.num_envs, 3), device=self.device, requires_grad=False)
-        if not self.curriculum: self._task_cfg["env"]["terrain"]["maxInitMapLevel"] = self._task_cfg["env"]["terrain"]["numLevels"] - 1
+        if not self.curriculum : self._task_cfg["env"]["terrain"]["maxInitMapLevel"] = self._task_cfg["env"]["terrain"]["numLevels"] - 1
         self.terrain_levels = torch.randint(0, self._task_cfg["env"]["terrain"]["maxInitMapLevel"]+1, (self.num_envs,), device=self.device)
         self.terrain_types = torch.randint(0, self._task_cfg["env"]["terrain"]["numTerrains"], (self.num_envs,), device=self.device)
         self._create_trimesh()

@@ -69,6 +69,7 @@ class BittleTask(RLTask):
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
+        self.rew_scales["energy_cost"] = self._task_cfg["env"]["learn"]["energyCostScale"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -135,7 +136,7 @@ class BittleTask(RLTask):
                 joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
             joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, 1300, 0, 5000)  # FIX IT
+            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 2500)  # FIX IT
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device,
                                            requires_grad=False)
@@ -183,10 +184,10 @@ class BittleTask(RLTask):
         obs = torch.cat(
             (
                 # base_lin_vel,
+                commands_scaled,
                 ratation_angs,
                 # base_ang_vel,
                 projected_gravity,
-                commands_scaled,
                 # ang_velocity * self.ang_vel_scale,
                 (dof_pos - self.default_dof_pos) * self.dof_pos_scale,
                 # dof_vel * self.dof_vel_scale,
@@ -357,21 +358,25 @@ class BittleTask(RLTask):
 
         ###############################################################################################
         # torch.diag(torch.mm(x,y.T))
+        torques = torch.clip(self.Kp * (self.current_targets - dof_pos) - self.Kd * dof_vel, -80., 80.)
 
-        torques = 1300 * (self.last_dof_pos - dof_pos) + 0.0 * (dof_vel)
-        # print("torques0:",torques)
+        # torques = 1 * (self.default_dof_pos - dof_pos) + 0.0 * (dof_vel)
+        # print("torques0:",torques,self.current_targets,dof_pos)
         # torques = torch.sum(torch.abs(_torques))
         # print("torques1:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
 
         # print("torques3:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
         energy_cost = torch.diag(torch.abs(torch.mm(torques, dof_vel.T)))
-        rew_energy_cost = torch.exp(-energy_cost / 0.25) * -0.1
-        # print(":",rew_lin_vel_xy , rew_action_rate  , rew_joint_acc , rew_energy_cost)
+        rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]
+        # print(":",rew_energy_cost)
         ###############################################################################################
         # print("K:",lin_vel_error,rew_lin_vel_xy,rew_energy_cost,rew_energy_cost)
 
         total_reward = rew_lin_vel_xy + rew_action_rate + rew_lin_vel_z + rew_ang_vel_z + rew_joint_acc + rew_energy_cost
+        # total_reward = rew_lin_vel_xy + rew_energy_cost
         # print("total:",self._bittles.get_euler_positions())
+        # total_reward = 1.0 * (current_positions_y - last_positions_y) * 1 + rew_energy_cost
+        # print("total_reward:",total_reward,rew_energy_cost)
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
@@ -382,9 +387,9 @@ class BittleTask(RLTask):
         # self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0)
         # self.fallen_over = self._bittles.is_base_below_threshold(threshold=0.51, ground_heights=0.0) | self._bittles.is_knee_below_threshold(threshold=0.21, #ground_heights=0.0)
 
-        self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.90) | \
-                           self._bittles.is_base_below_threshold(threshold=0.41, ground_heights=0.0) | \
-                           self._bittles.is_knee_below_threshold(threshold=0.2, ground_heights=0.0)
+        self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.5) | \
+                           self._bittles.is_knee_below_threshold(threshold=0.2,
+                                                                 ground_heights=0.0)  # FIX 0.2 is lowest threshold
 
         # self.fallen_over = self._bittles.is_orientation_below_threshold(threshold=0.90)
         # print("fallen:",self.fallen_over)

@@ -51,8 +51,6 @@ bittle_setting.py
 isaac sim 中载入bittle usd
 在script editor 中打开bittle_art_udp_rl_script.py
 
-
-
 - 启动rl 控制程序（和服务端交互）
 PYTHON_PATH scripts/infer_udp_test.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1
 

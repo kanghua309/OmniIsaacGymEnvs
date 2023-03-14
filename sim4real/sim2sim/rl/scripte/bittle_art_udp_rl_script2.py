@@ -165,6 +165,9 @@ def get_euler_positions(torso_rotation):
     ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
     return ang
 
+
+# https://quaternion.readthedocs.io/en/latest/
+
 import asyncio
 import socket
 import time
@@ -222,14 +225,14 @@ async def my_task(host):
         # 获得rotation,return tensor？
         transform = dc.get_rigid_body_pose(body)
         print("torso_rotation:", transform.r)
-        print("torse_rotation's rotaion:", torch.Tensor(transform.r))
+        print("torse_rotation's rotaion0:", torch.Tensor(transform.r))
         torso_rotation = torch.Tensor(
             [transform.r.w, transform.r.x, transform.r.y, transform.r.z])  # FIX IT w index change
         torso_rotation = torch.unsqueeze(torso_rotation, 0)
         # torso_rotation = torch.unsqueeze( transform.r, 0)
         print("torse_rotation's rotaion1:", torso_rotation)
-
         ratation_angs = get_euler_positions(torso_rotation)
+        print("ratation_angs:", ratation_angs)
 
         # 获得body的角速度和线速度？，return np
         # velocity = torch.unsqueeze(torch.Tensor(dc.get_rigid_body_linear_velocity(body)), 0)
@@ -238,12 +241,10 @@ async def my_task(host):
         # print("velocity's ang_velocity:", torch.Tensor(velocity), torch.Tensor(ang_velocity))
         _gravity_vec = torch.unsqueeze(torch.Tensor(gravity_vec), 0)
         print("gravity_vec:", _gravity_vec)
-
         # 获得关节的位置和速度，return np
         dof_pos = np.array(dc.get_articulation_dof_position_targets(art),dtype=np.float32)
         # dof_vel = np.array(dc.get_articulation_dof_velocity_targets(art),dtype=np.float32)
         print("dof_pos :", dof_pos)
-
         # rotation * 速度的到实际base 线速度？ 数据类型是否满足？
         # FIX IT must [[]]
         #
@@ -264,24 +265,14 @@ async def my_task(host):
 
         pre_actions = acts
         print("pre_actions:", pre_actions)
-        # 转numpy -- torch_tensor.cpu().detach().numpy()
-        # obs = np.array([cart_pos, cart_vel, pole_pos, pole_vel], dtype=np.float32)
-        # 合并多个array 到一个 np.concatenate((a, b), axis=None)
-        # base_lin_vel,
-        # base_ang_vel,
-        # projected_gravity,
-        # commands_scaled,
-        # dof_pos_scaled,
-        # dof_vel * self.dof_vel_scale,
-        # self.actions,
 
         joint_angles_history = np.append(joint_angles_history, dof_pos)
         joint_angles_history = np.delete(joint_angles_history, np.s_[0:8])
-
+        print("joint_angles_history:",joint_angles_history)
         obs = np.concatenate((
+                              commands_scaled,
                               ratation_angs.cpu().detach().numpy(),
                               projected_gravity.cpu().detach().numpy(),
-                              commands_scaled,
                               dof_pos_scaled,
                               joint_angles_history,
                               pre_actions), axis=None)

@@ -15,20 +15,15 @@ import numpy as np
 # }
 
 joint_limits = {
-    "left_back_shoulder_joint":(-75,0),
-    "left_front_shoulder_joint":(0,75),
-    "right_back_shoulder_joint":(0,75),
-    "right_front_shoulder_joint":(-75,0),
-    "left_back_knee_joint":(75,90),
-    "left_front_knee_joint":(-90,-75),
-    "right_back_knee_joint":(-90,-75),
-    "right_front_knee_joint":(75,90),
+    "left_back_shoulder_joint":(-40,40),
+    "left_front_shoulder_joint":(-40,40),
+    "right_back_shoulder_joint":(-40,40),
+    "right_front_shoulder_joint":(-40,40),
+    "left_back_knee_joint":(-60,0),
+    "left_front_knee_joint":(-60,0),
+    "right_back_knee_joint":(0,60),
+    "right_front_knee_joint":(0,60),
 }
-
-
-
-
-
 
 stage = omni.usd.get_context().get_stage()
 joint_paths = []
@@ -44,9 +39,9 @@ for joint_path in joint_paths:
     # drive.GetTargetVelocityAttr().Set(30)
     # drive.GetTargetPositionAttr().Set(1)
     drive.GetTargetPositionAttr().Set(0)
-    drive.GetDampingAttr().Set(0)
-    drive.GetStiffnessAttr().Set(1300)
-    drive.GetMaxForceAttr().Set(5000) #感觉是关节软硬！ 小于xxxx 打滑
+    drive.GetDampingAttr().Set(2)
+    drive.GetStiffnessAttr().Set(85)
+    drive.GetMaxForceAttr().Set(2500) #感觉是关节软硬！ 小于xxxx 打滑
 
     revoluteJoint = UsdPhysics.RevoluteJoint.Get(stage, f"/bittle/{joint_path}")
     joint = joint_path.split("/")[-1]

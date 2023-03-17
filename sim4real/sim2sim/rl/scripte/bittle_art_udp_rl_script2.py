@@ -172,12 +172,13 @@ import asyncio
 import socket
 import time
 
-acts = np.zeros(8, dtype=np.float32)
-current_targets = np.zeros(8, dtype=np.float32)
-joint_angles_history = np.zeros((8,8))
+# acts = np.zeros(8, dtype=np.float32)
+# current_targets = np.zeros(8, dtype=np.float32)
+# joint_angles_history = np.zeros((8,8))
 
 async def my_task(host):
     print(f"my task begin")
+    joint_angles_history = np.zeros((8, 8),dtype=np.float32)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setblocking(0)
     s.bind(host)
@@ -259,7 +260,7 @@ async def my_task(host):
         # dof_vel_scaled = dof_vel * 0.05  # self.dof_vel_scale
         print("dof_pos_scaled:", dof_pos_scaled)
         # print("dof_vel_scaled:", dof_vel_scaled)
-        commands_scaled = np.array([0.0, 1.0, 0.0], dtype=np.float32) \
+        commands_scaled = np.array([0.0, -1.0, 0.0], dtype=np.float32) \
                           * np.array([2.0, 2.0, 0.25], dtype=np.float32)
         print("commands_scaled:", commands_scaled)
 
@@ -278,7 +279,7 @@ async def my_task(host):
                               pre_actions), axis=None)
         print("obs----------------------------------------------- 0\n:", obs)
         s.sendto(obs.tostring(), addr)
-        await asyncio.sleep(1)  # must ， gui not block
+        await asyncio.sleep(0.01)  # must ， gui not block
 
 
 addr = ('', 8080)

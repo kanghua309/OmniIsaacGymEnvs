@@ -38,7 +38,7 @@ PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=4096 train.params.conf
 - 测试训练效果
 PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=1 train.params.config.minibatch_size=16 train.params.config.horizon_length=16 test=true checkpoint=runs/Bittle/nn/Bittle.pth
 - 测试向前走效果
-PYTHON_PATH scripts/rlgames_infer_test.py task=Bittle test=True checkpoint="runs/Bittle/nn/Bittle.pth" headless=False num_envs=1 max_iterations=10
+PYTHON_PATH scripts/rlgames_infer_test.py task=Bittle test=True checkpoint="runs/Bittle/nn/Bittle.pth" headless=True num_envs=1 max_iterations=10
 
 
 

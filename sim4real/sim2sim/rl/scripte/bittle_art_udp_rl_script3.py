@@ -151,7 +151,7 @@ async def my_task(host):
         simple_obs = np.concatenate((ratation_angs.cpu().detach().numpy()), axis=None)
         print("obs----------------------------------------------- 0\n:", simple_obs)
         s.sendto(simple_obs.tostring(), addr)
-        await asyncio.sleep(0.1)  # must ， gui not block
+        await asyncio.sleep(0.05)  # must ， gui not block
 
 
 addr = ('', 8080)

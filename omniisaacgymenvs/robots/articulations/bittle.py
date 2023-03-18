@@ -59,7 +59,11 @@ class Bittle(Robot):
             assets_root_path = get_assets_root_path()
             if assets_root_path is None:
                 carb.log_error("Could not find nucleus server with /Isaac folder")
-            self._usd_path = assets_root_path + "/Isaac/Robots/ANYbotics/bittle_instanceable.usd"
+            #self._usd_path = assets_root_path + "/Isaac/Robots/ANYbotics/bittle_instanceable.usd"
+            self._usd_path = "omniverse://localhost/Users/king/bittle.usd"
+
+            print("usd path:",self._usd_path)
+
         add_reference_to_stage(self._usd_path, prim_path)
 
         super().__init__(

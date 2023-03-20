@@ -127,7 +127,7 @@ class BittleIMUTask(RLTask):
         props = _imu_sensor.SensorProperties()
         props.position = carb.Float3(0, 0, 0)
         props.orientation = carb.Float4(0, 0, 0, 1)
-        #props.sensorPeriod = 1 / 2000 #？？？
+        props.sensorPeriod = 1 / 2000 #？？？
         self._is.add_sensor_on_body(self.default_zero_env_path + "/bittle" + "/base_link", props)#安装到 imu_link上 ？
 
         # Configure joint properties

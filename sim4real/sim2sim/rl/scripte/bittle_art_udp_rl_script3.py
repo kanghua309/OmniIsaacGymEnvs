@@ -28,14 +28,14 @@ JOINTS = [
 omni.timeline.get_timeline_interface().play()
 gravity_vec = np.array([0.0, 0.0, -1.0])  # FIX IT
 default_dof_pos = np.array([
-   0.523,
-   0.623,
-   -0.523,
-   -0.623,
-   -1.047,
-   -1.047,
-   1.047,
-   1.047,
+    0.523,
+    0.623,
+    -0.523,
+    -0.623,
+    -1.047,
+    -1.047,
+    1.047,
+    1.047,
 ], dtype=np.float32)
 
 cur_dof_pos = np.zeros(8, dtype=np.float32)
@@ -59,24 +59,57 @@ print("art & body:", art, body)
 lower_limits = np.zeros(8)
 upper_limits = np.zeros(8)
 
-for i,joint in enumerate(JOINTS):
+for i, joint in enumerate(JOINTS):
     dof_ptr = dc.find_articulation_dof(art, joint)
     prop = dc.get_dof_properties(dof_ptr)
     lower_limits[i] = prop.lower
     upper_limits[i] = prop.upper
 
-print("lower_limits:",lower_limits)
-print("upper_limits:",upper_limits)
+print("lower_limits:", lower_limits)
+print("upper_limits:", upper_limits)
+# FIX IT - 动态加入imu ？？
+import omni.kit.commands
+from omni.isaac.sensor import _sensor
+import carb
+from pxr import Gf, UsdGeom
 
+stage = omni.usd.get_context().get_stage()
+curr_prim = stage.GetPrimAtPath("/bittle/base_frame_link")
+print(curr_prim.GetChildren())
+is_need_create_imu = True
+for prim in curr_prim.GetChildren():
+    if prim.GetPrimPath() == "/bittle/base_frame_link/sensor":
+        is_need_create_imu = False
+        break
 
+if is_need_create_imu:
+    result, sensor = omni.kit.commands.execute(
+        "IsaacSensorCreateImuSensor",
+        path="/sensor",
+        parent="/bittle/base_frame_link",
+        sensor_period=1 / 500.0,
+        translation=Gf.Vec3d(0, 0, 0),
+        orientation=Gf.Quatd(1, 0, 0, 0),
+        visualize=True,
+    )
+
+_is = _sensor.acquire_imu_sensor_interface()
+# props = _sensor.SensorProperties()
+# props.position = carb.Float3(0, 0, 0)
+# props.orientation = carb.Float4(0, 0, 0, 1)
+# props.sensorPeriod = 1 / 500 #？？？
+# _is.add_sensor_on_body("/bittle" + "/imu_link", props) #安装到 imu_link上 ？
+
+from ahrs.filters import Madgwick
+madgwick = Madgwick()
 
 def quaternion_to_euler(x, y, z, w):
-    #print(x)
+    # print(x)
     t0 = +2.0 * (w * x + y * z)
     t1 = +1.0 - 2.0 * (x * x + y * y)
-    #print(t1)
+    # print(t1)
     roll = torch.atan2(t0, t1)
-    #print("roll:",roll)
+    # print("roll:",roll)
     t2 = +2.0 * (w * y - z * x)
     # t2 = +1.0 if t2 > +1.0 else t2
     # t2 = -1.0 if t2 < -1.0 else t2
@@ -86,8 +119,9 @@ def quaternion_to_euler(x, y, z, w):
     t3 = +2.0 * (w * z + x * y)
     t4 = +1.0 - 2.0 * (y * y + z * z)
     yaw = torch.atan2(t3, t4)
-    #print(yaw,pitch,roll)
-    return torch.stack([roll, pitch, yaw],dim=0).T
+    # print(yaw,pitch,roll)
+    return torch.stack([roll, pitch, yaw], dim=0).T
+
 
 def get_euler_positions(torso_rotation):
     x = torso_rotation[:, 1]
@@ -97,13 +131,15 @@ def get_euler_positions(torso_rotation):
     ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
     return ang
 
+
 import asyncio
 import socket
 import time
 
+
 async def my_task(host):
     print(f"my task begin")
-    joint_angles_history = np.zeros((8, 8),dtype=np.float32)
+    joint_angles_history = np.zeros((8, 8), dtype=np.float32)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setblocking(0)
     s.bind(host)
@@ -118,14 +154,15 @@ async def my_task(host):
         print("receive data:", data, addr)
         if data == b'':
             print("client comming on ... ")
-            acts = default_dof_pos - default_dof_pos # FIX IT
+            acts = default_dof_pos - default_dof_pos  # FIX IT
             current_targets = default_dof_pos.copy()
+            PQ = [1.0, 0.0, 0.0, 0.0]
         else:
-            acts = np.fromstring(data, np.float32) #It is diff action, not action
+            acts = np.fromstring(data, np.float32)  # It is diff action, not action
             print('[Recieved] {} {}'.format(acts, addr))
-            _current_targets = current_targets + 13.5 * acts * 1/100
-            current_targets[:] = np.clip(_current_targets,lower_limits,upper_limits)
-            print("current_targets:",current_targets)
+            _current_targets = current_targets + 13.5 * acts * 1 / 100
+            current_targets[:] = np.clip(_current_targets, lower_limits, upper_limits)
+            print("current_targets:", current_targets)
 
         for idx, (joint, pos) in enumerate(zip(JOINTS, current_targets)):
             dof_ptr = dc.find_articulation_dof(art, joint)
@@ -135,14 +172,24 @@ async def my_task(host):
             # Set joint position target
             dc.set_dof_position_target(dof_ptr, pos)
 
-
         print("prepare send obs now")
         # 获得rotation,return tensor？
-        transform = dc.get_rigid_body_pose(body)
-        print("torso_rotation:", transform.r)
-        print("torse_rotation's rotaion0:", torch.Tensor(transform.r))
+        #transform = dc.get_rigid_body_pose(body)
+        #print("torso_rotation:", transform.r)
+        reading = _is.get_sensor_readings("/bittle/base_frame_link/sensor")
+        if reading.shape[0]:
+            print("imu ratation:",reading[-1]["orientation"],
+                  reading[-1]["lin_acc_x"],reading[-1]["lin_acc_y"],reading[-1]["lin_acc_z"],
+                  reading[-1]["ang_vel_x"], reading[-1]["ang_vel_y"], reading[-1]["ang_vel_z"],
+                  )
+            NQ = madgwick.updateIMU(PQ,
+                                    gyr=np.array([reading[-1]["ang_vel_x"], reading[-1]["ang_vel_y"], reading[-1]["ang_vel_z"]]),
+                                    acc=np.array([reading[-1]["lin_acc_x"],reading[-1]["lin_acc_y"],reading[-1]["lin_acc_z"]]))
+            PQ = NQ
+
+        print("torse_rotation's rotaion0:", torch.Tensor(NQ))
         torso_rotation = torch.Tensor(
-            [transform.r.w, transform.r.x, transform.r.y, transform.r.z])  # FIX IT w index change
+            [NQ[0],NQ[1],NQ[2],NQ[3]])  # FIX IT w index change  w is idx first
         torso_rotation = torch.unsqueeze(torso_rotation, 0)
         # torso_rotation = torch.unsqueeze( transform.r, 0)
         print("torse_rotation's rotaion1:", torso_rotation)

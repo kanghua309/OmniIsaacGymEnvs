@@ -237,15 +237,15 @@ class RLGTrainer():
             print("Action :",_acts)
             acts = _acts
             param = {
-                'la1': acts[0],
-                'ra1': acts[1],
-                'ra2': acts[2],
-                'la2': acts[3],
+                'la1': round(np.rad2deg(acts[0])),
+                'ra1': round(np.rad2deg(acts[1])),
+                'ra2': round(np.rad2deg(acts[2])),
+                'la2': round(np.rad2deg(acts[3])),
 
-                'll1': -acts[4],
-                'rl1': -acts[5],
-                'rl2': -acts[6],
-                'll2': -acts[7]
+                'll1': -round(np.rad2deg(acts[4])),
+                'rl1': -round(np.rad2deg(acts[5])),
+                'rl2': -round(np.rad2deg(acts[6])),
+                'll2': -round(np.rad2deg(acts[7])),
             }
             response = requests.get(url=driver_location, params=param)
             #s.sendto(acts.tostring(), addr)

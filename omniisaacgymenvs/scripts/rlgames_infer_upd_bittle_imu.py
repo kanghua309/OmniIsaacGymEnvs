@@ -187,10 +187,10 @@ class RLGTrainer():
                       reading["GX"], reading["GY"], reading["GZ"],
                       )
             NQ = madgwick.updateIMU(PQ,
-                                    gyr=np.array([reading[-1]["GX"], reading[-1]["GY"],
-                                                      reading[-1]["GZ"]]),
-                                    acc=np.array([reading[-1]["AX"], reading[-1]["AY"],
-                                                      reading[-1]["AZ"]]))
+                                    gyr=np.array([reading[-1]["GX"]/100_000, reading[-1]["GY"]/100_000,
+                                                      reading[-1]["GZ"]/100_000]),
+                                    acc=np.array([reading[-1]["AX"]/100_000, reading[-1]["AY"]/100_000,
+                                                      reading[-1]["AZ"]/100_000]))
             PQ = NQ
             euler = euler_from_quaternion(NQ[0],NQ[1],NQ[2],NQ[3])
             print("Receive Obs Raw:",euler)

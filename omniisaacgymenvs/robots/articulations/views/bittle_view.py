@@ -25,12 +25,11 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import torch
 from typing import Optional
-
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
-import torch
+from sim4real.utils.rotation import tensor_get_euler_positions
 
 # def quaternion_to_euler(x, y, z, w):
 
@@ -56,7 +55,7 @@ import numpy as np
 #pitch：绕y轴
 #yaw：绕z轴
 
-def quaternion_to_euler(x, y, z, w):
+def quaternion_to_euler(w, x, y, z):
     #print(x)
     t0 = +2.0 * (w * x + y * z)
     t1 = +1.0 - 2.0 * (x * x + y * y)
@@ -130,5 +129,5 @@ class BittleView(ArticulationView):
         y = torso_rotation[:, 2]
         z = torso_rotation[:, 3]
         w = torso_rotation[:, 0]
-        ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+        ang = torch.Tensor(tensor_get_euler_positions(w, x, y, z))
         return ang

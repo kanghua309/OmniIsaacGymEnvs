@@ -1,5 +1,4 @@
 import math
-
 import carb
 import numpy as np
 from omni.isaac.kit import SimulationApp
@@ -12,6 +11,8 @@ from omni.isaac.core.utils.torch.rotations import *
 
 import torch
 from torch import cpu
+
+###########################################################################
 
 JOINTS = [
     "left_back_shoulder_joint",
@@ -41,6 +42,8 @@ default_dof_pos = np.array([
 cur_dof_pos = np.zeros(8, dtype=np.float32)
 cur_dof_vel = np.zeros(8, dtype=np.float32)
 
+###########################################################################
+
 print(cur_dof_pos, cur_dof_vel)
 dc = _dynamic_control.acquire_dynamic_control_interface()
 # Get handle to articulation
@@ -56,6 +59,8 @@ if body == _dynamic_control.INVALID_HANDLE:
 
 print("art & body:", art, body)
 
+###########################################################################
+
 lower_limits = np.zeros(8)
 upper_limits = np.zeros(8)
 
@@ -67,6 +72,9 @@ for i, joint in enumerate(JOINTS):
 
 print("lower_limits:", lower_limits)
 print("upper_limits:", upper_limits)
+
+###########################################################################
+
 # FIX IT - 动态加入imu ？？
 import omni.kit.commands
 from omni.isaac.sensor import _sensor
@@ -92,50 +100,51 @@ if is_need_create_imu:
         orientation=Gf.Quatd(1, 0, 0, 0),
         visualize=True,
     )
-
 _is = _sensor.acquire_imu_sensor_interface()
-# props = _sensor.SensorProperties()
-# props.position = carb.Float3(0, 0, 0)
-# props.orientation = carb.Float4(0, 0, 0, 1)
-# props.sensorPeriod = 1 / 500 #？？？
-# _is.add_sensor_on_body("/bittle" + "/imu_link", props) #安装到 imu_link上 ？
 
+###########################################################################
+# imu 滤波器
 from ahrs.filters import Madgwick
 madgwick = Madgwick()
 
-def quaternion_to_euler(x, y, z, w):
-    # print(x)
-    t0 = +2.0 * (w * x + y * z)
-    t1 = +1.0 - 2.0 * (x * x + y * y)
-    # print(t1)
-    roll = torch.atan2(t0, t1)
-    # print("roll:",roll)
-    t2 = +2.0 * (w * y - z * x)
-    # t2 = +1.0 if t2 > +1.0 else t2
-    # t2 = -1.0 if t2 < -1.0 else t2
-    t2 = torch.where(t2 > +1.0, +1.0, t2)
-    t2 = torch.where(t2 < -1.0, -1.0, t2)
-    pitch = torch.asin(t2)
-    t3 = +2.0 * (w * z + x * y)
-    t4 = +1.0 - 2.0 * (y * y + z * z)
-    yaw = torch.atan2(t3, t4)
-    # print(yaw,pitch,roll)
-    return torch.stack([roll, pitch, yaw], dim=0).T
+###########################################################################
+
+from sim4real.utils.rotation import tensor_get_euler_positions
 
 
-def get_euler_positions(torso_rotation):
-    x = torso_rotation[:, 1]
-    y = torso_rotation[:, 2]
-    z = torso_rotation[:, 3]
-    w = torso_rotation[:, 0]
-    ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
-    return ang
+#
+# def quaternion_to_euler(x, y, z, w):
+#     # print(x)
+#     t0 = +2.0 * (w * x + y * z)
+#     t1 = +1.0 - 2.0 * (x * x + y * y)
+#     # print(t1)
+#     roll = torch.atan2(t0, t1)
+#     # print("roll:",roll)
+#     t2 = +2.0 * (w * y - z * x)
+#     # t2 = +1.0 if t2 > +1.0 else t2
+#     # t2 = -1.0 if t2 < -1.0 else t2
+#     t2 = torch.where(t2 > +1.0, +1.0, t2)
+#     t2 = torch.where(t2 < -1.0, -1.0, t2)
+#     pitch = torch.asin(t2)
+#     t3 = +2.0 * (w * z + x * y)
+#     t4 = +1.0 - 2.0 * (y * y + z * z)
+#     yaw = torch.atan2(t3, t4)
+#     # print(yaw,pitch,roll)
+#     return torch.stack([roll, pitch, yaw], dim=0).T
+#
+#
+# def get_euler_positions(torso_rotation):
+#     x = torso_rotation[:, 1]
+#     y = torso_rotation[:, 2]
+#     z = torso_rotation[:, 3]
+#     w = torso_rotation[:, 0]
+#     ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+#     return ang
 
 
 import asyncio
 import socket
 import time
-
 
 async def my_task(host):
     print(f"my task begin")
@@ -174,8 +183,6 @@ async def my_task(host):
 
         print("prepare send obs now")
         # 获得rotation,return tensor？
-        #transform = dc.get_rigid_body_pose(body)
-        #print("torso_rotation:", transform.r)
         reading = _is.get_sensor_readings("/bittle/base_frame_link/sensor")
         if reading.shape[0]:
             print("imu ratation:",reading[-1]["orientation"],
@@ -193,7 +200,7 @@ async def my_task(host):
         torso_rotation = torch.unsqueeze(torso_rotation, 0)
         # torso_rotation = torch.unsqueeze( transform.r, 0)
         print("torse_rotation's rotaion1:", torso_rotation)
-        ratation_angs = get_euler_positions(torso_rotation)
+        ratation_angs = tensor_get_euler_positions(torso_rotation)
         print("ratation_angs:", ratation_angs)
         simple_obs = np.concatenate((ratation_angs.cpu().detach().numpy()), axis=None)
         print("obs----------------------------------------------- 0\n:", simple_obs)

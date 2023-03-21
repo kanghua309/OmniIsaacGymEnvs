@@ -27,7 +27,12 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import json
 import math
-
+import datetime
+import os
+import random
+import socket
+import time
+import torch
 import numpy as np
 import requests
 
@@ -44,26 +49,21 @@ from omegaconf import DictConfig
 from rl_games.common import env_configurations, vecenv
 from rl_games.torch_runner import Runner
 
-import datetime
-import os
-import random
-import socket
-import time
-
-import torch
 # import omni
 # from omni.isaac.core.utils.torch.rotations import *
+from sim4real.utils.rotation import get_quaternion_from_euler,point_rotation_by_quaternion
+
 
 from ahrs.filters import Madgwick
 madgwick = Madgwick()
 
-
-def get_quaternion_from_euler(roll, pitch, yaw):
-    qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-    qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-    qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    return [ qw, qx, qy, qz ]
+#
+# def get_quaternion_from_euler(roll, pitch, yaw):
+#     qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+#     qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+#     qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+#     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+#     return [ qw, qx, qy, qz ]
 
 def euler_from_quaternion(x, y, z, w):
     """

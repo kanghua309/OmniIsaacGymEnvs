@@ -183,14 +183,14 @@ class RLGTrainer():
             imu_data = json.loads(response.text)
             reading = imu_data
             print("imu ratation:",
-                      reading["lin_acc_x"], reading["lin_acc_y"], reading["lin_acc_z"],
-                      reading["ang_vel_x"], reading["ang_vel_y"], reading["ang_vel_z"],
+                      reading["AX"], reading["AY"], reading["AZ"],
+                      reading["GX"], reading["GY"], reading["GZ"],
                       )
             NQ = madgwick.updateIMU(PQ,
-                                    gyr=np.array([reading[-1]["ang_vel_x"], reading[-1]["ang_vel_y"],
-                                                      reading[-1]["ang_vel_z"]]),
-                                    acc=np.array([reading[-1]["lin_acc_x"], reading[-1]["lin_acc_y"],
-                                                      reading[-1]["lin_acc_z"]]))
+                                    gyr=np.array([reading[-1]["GX"], reading[-1]["GY"],
+                                                      reading[-1]["GZ"]]),
+                                    acc=np.array([reading[-1]["AX"], reading[-1]["AY"],
+                                                      reading[-1]["AZ"]]))
             PQ = NQ
             euler = euler_from_quaternion(NQ[0],NQ[1],NQ[2],NQ[3])
             print("Receive Obs Raw:",euler)

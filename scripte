@@ -55,6 +55,7 @@ bittle_setting.py (设置一些关节参数，重量参数等等）
    PYTHON_PATH scripts/rlgames_infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1 (对应bittle_art_udp_rl_script_pose.py）
    PYTHON_PATH scripts/rlgames_infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1（对应bittle_art_udp_rl_script_imu.py）
    实体bittle 使用http 交互
-   PYTHON_PATH scripts/rlgames_infer_udp_bittle_imu_http.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle）
+   PYTHON_PATH scripts/rlgames_infer_http_bittle_imu.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle -- 只给加速度，速度，不进行硬件解算）
+   PYTHON_PATH scripts/rlgames_infer_http_bittle_imu2.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle -- 进行硬件解算）
 
 

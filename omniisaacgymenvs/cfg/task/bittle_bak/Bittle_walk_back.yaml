@@ -20,7 +20,7 @@ env:
 
   randomCommandVelocityRanges:
     linear_x: [-0., 0.] # min max [m/s]
-    linear_y: [-1., 1.]  # min max [m/s]
+    linear_y: [-1., -1.]  # min max [m/s]
     #向后走： -1，-1
     yaw: [-0., 0.]       # min max [rad/s] 偏角是不是应该有？ no
 

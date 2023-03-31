@@ -52,9 +52,9 @@ bittle_setting.py (设置一些关节参数，重量参数等等）
 1. isaac sim 中载入bittle usd
 2. 在script editor 中打开bittle_art_udp_rl_script_pose.py 或 bittle_art_udp_rl_script_imu.py （其中的obs要和训练的obs要一致； *pose.py是利用sim获得pose；*imu.py是使用imu的reading自己计算pose）
 3. 启动rl 控制程序（和服务端交互）
-   PYTHON_PATH scripts/infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1 (对应bittle_art_udp_rl_script_pose.py）
-   PYTHON_PATH scripts/infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1（对应bittle_art_udp_rl_script_imu.py）
+   PYTHON_PATH scripts/rlgames_infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1 (对应bittle_art_udp_rl_script_pose.py）
+   PYTHON_PATH scripts/rlgames_infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1（对应bittle_art_udp_rl_script_imu.py）
    实体bittle 使用http 交互
-   PYTHON_PATH scripts/infer_udp_bittle_imu_http.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle）
+   PYTHON_PATH scripts/rlgames_infer_udp_bittle_imu_http.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle）
 
 

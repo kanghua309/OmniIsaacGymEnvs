@@ -1,0 +1,146 @@
+# used to create the object
+name: Bittle
+
+physics_engine: ${..physics_engine}
+
+env:
+  numEnvs: ${resolve_default:4096,${...num_envs}}
+  envSpacing: 4.  # [m]
+
+  clipObservations: 5.0
+  clipActions: 1.0
+
+  controlFrequencyInv: 5
+
+  baseInitState:
+    pos: [0.0, 0.0, 1.06] # x,y,z [m]  1.08 好像是bittle  base 的高度？
+    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
+    vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
+    vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+
+  randomCommandVelocityRanges:
+    linear_x: [-0., 0.] # min max [m/s]
+    linear_y: [0.5, 1.0]  # min max [m/s]
+    yaw: [-0., 0.]       # min max [rad/s] 偏角是不是应该有？
+
+  control:
+    # PD Drive parameters:
+    stiffness: 85.0  # [N*m/rad]
+    damping: 2.0     # [N*m*s/rad]
+    max_force: 2500  #这个值太小，撑不起身体，太软？
+    actionScale: 13.5
+
+  defaultJointAngles:  # = target angles when action = 0.0
+
+    #顺序不要乱动！！！
+    # left_back_shoulder_joint: 0       # [rad] <-
+    # left_front_shoulder_joint: 0      # [rad] <-
+    # right_back_shoulder_joint: -0     # [rad] <-
+    # right_front_shoulder_joint: -0    # [rad] <-
+
+    # left_back_knee_joint: -0        # [rad
+    # left_front_knee_joint: -0        # [rad] ->
+    # right_back_knee_joint: 0         # [rad] ->
+    # right_front_knee_joint: 0        # [rad] ->
+
+    left_back_shoulder_joint: 0.523       # [rad] <-
+    left_front_shoulder_joint: 0.623      # [rad] <-
+    right_back_shoulder_joint: -0.523     # [rad] <-
+    right_front_shoulder_joint: -0.623    # [rad] <-
+
+    left_back_knee_joint: -1.047        # [rad] ->
+    left_front_knee_joint: -1.047        # [rad] ->
+    right_back_knee_joint: 1.047         # [rad] ->
+    right_front_knee_joint: 1.047        # [rad] ->
+
+    # left_back_shoulder_joint: 0.52       # [rad] <-
+    # left_front_shoulder_joint: 0.52      # [rad] <-
+    # right_back_shoulder_joint: -0.52     # [rad] <-
+    # right_front_shoulder_joint: -0.52    # [rad] <-
+
+    # left_back_knee_joint: 0.52        # [rad] ->
+    # left_front_knee_joint: 0.52        # [rad] ->
+    # right_back_knee_joint: -0.52         # [rad] ->
+    # right_front_knee_joint: -0.52        # [rad] ->
+
+  learn:
+    # rewards
+    linearVelocityXYRewardScale: 1.0 #FIX IT add?
+    angularVelocityZRewardScale: 0.0
+    linearVelocityZRewardScale: -0.00
+    jointAccRewardScale: -0.00  #FIX Todo
+    actionRateRewardScale: -0.00  #FIX todo
+    cosmeticRewardScale: -0.00    #FIX zero
+    energyCostScale: -0.00002 #-0.00035 fail , -0.00032 ok
+
+
+    # normalization
+    linearVelocityScale: 1.0 #FIX IT
+    angularVelocityScale: 0.25
+    dofPositionScale: 1.0
+    dofVelocityScale: 0.05
+
+    # episode length in seconds
+    episodeLength_s: 50
+
+sim:
+  dt: 0.01
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [0.0, 0.0, -9.81]
+  add_ground_plane: True
+  use_flatcache: True
+  enable_scene_query_support: False
+  disable_contact_processing: False
+
+  # set to True if you use camera sensors in the environment
+  enable_cameras: False
+
+  default_physics_material:
+    static_friction: 1.0
+    dynamic_friction: 1.0
+    restitution: 0.0
+
+  physx:
+    worker_thread_count: ${....num_threads}
+    solver_type: ${....solver_type}
+    use_gpu: ${eq:${....sim_device},"gpu"} # set to False to run on CPU
+    solver_position_iteration_count: 4
+    solver_velocity_iteration_count: 1
+    contact_offset: 0.02
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    friction_offset_threshold: 0.04
+    friction_correlation_distance: 0.025
+    enable_sleeping: True
+    enable_stabilization: True
+    max_depenetration_velocity: 100.0
+
+    # GPU buffers
+    gpu_max_rigid_contact_count: 524288
+    gpu_max_rigid_patch_count: 163840
+    gpu_found_lost_pairs_capacity: 4194304
+    gpu_found_lost_aggregate_pairs_capacity: 33554432
+    gpu_total_aggregate_pairs_capacity: 4194304
+    gpu_max_soft_body_contacts: 1048576
+    gpu_max_particle_contacts: 1048576
+    gpu_heap_capacity: 134217728
+    gpu_temp_buffer_capacity: 33554432
+    gpu_max_num_partitions: 8
+
+  Bittle:
+    # -1 to use default values
+    override_usd_defaults: False
+    enable_self_collisions: False
+    enable_gyroscopic_forces: True
+    # also in stage params
+    # per-actor
+    solver_position_iteration_count: 4
+    solver_velocity_iteration_count: 1
+    sleep_threshold: 0.005
+    stabilization_threshold: 0.001
+    # per-body
+    density: -1
+    max_depenetration_velocity: 100.0
+    # per-shape
+    contact_offset: 0.02
+    rest_offset: 0.0

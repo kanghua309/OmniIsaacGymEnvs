@@ -183,7 +183,7 @@ class RLGTrainer():
             imu_data = json.loads(response.text)
             reading = imu_data
             print("imu ratation:",
-                      reading["W"], reading["X"], reading["Y"],reading["Z"]
+                      reading["W"], reading["X"], reading["Y"], reading["Z"]
                       )
             # NQ = madgwick.updateIMU(PQ,
             #                         gyr=np.array([reading[-1]["GX"]/100_000, reading[-1]["GY"]/100_000,

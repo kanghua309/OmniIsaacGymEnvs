@@ -21,13 +21,18 @@ env:
   randomCommandVelocityRanges:
     linear_x: [-0., 0.] # min max [m/s]
     linear_y: [-1., 1.]  # min max [m/s]
+    #向后走： -1，-1
     yaw: [-0., 0.]       # min max [rad/s] 偏角是不是应该有？ no
 
   control:
     # PD Drive parameters:
-    stiffness: 85.0  # [N*m/rad]
-    damping: 2.0     # [N*m*s/rad]
+    # 向后似乎85够了，向前感觉力量不足！ 需要加大400？ 好像也不是，damping 减小起作用，比如给0！ 重量，速度，似乎决定了damping 给大就不行！ -- 都不对！ 这两个值给不好，学不好走路
+    # 向前走damping 2.0 似乎就不动？
+    stiffness: 85.0  # [N*m/rad] --
+    damping: 2.0     # [N*m*s/rad] -- 这个值给稍微大点就变成 40 就走不动了？
+    max_force: 2500  #这个值太小，撑不起身体，太软？ 这个值似乎和身体重量有关
     actionScale: 13.5
+    #向后走：85.0,2.0,2500
 
   defaultJointAngles:  # = target angles when action = 0.0
 
@@ -46,11 +51,13 @@ env:
     # rewards
     linearVelocityXYRewardScale: 1.0
     angularVelocityZRewardScale: 0.0
-    linearVelocityZRewardScale: -0.03 #FIX
-    jointAccRewardScale: -0.0006 #FIX
-    actionRateRewardScale: -0.006
+    linearVelocityZRewardScale: -0.0 #FIX
+    jointAccRewardScale: -0.000 #FIX
+    actionRateRewardScale: -0.00
     cosmeticRewardScale: -0.00 #FIX
-    energyCostScale: -0.05
+    energyCostRewardScale: -0.0
+
+    #walk back  only linearVelocityXYRewardScale = 1.0
 
 
     # normalization

@@ -167,9 +167,9 @@ class RLGTrainer():
 
         #obs = env.reset()
         num_steps = 0
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #连接服务端
-        addr = ("127.0.0.1", 8080)
-        s.sendto(b'', addr) #client send first must
+        # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #连接服务端
+        # addr = ("127.0.0.1", 8080)
+        # s.sendto(b'', addr) #client send first must
         current_targets = default_dof_pos.copy()
         acts = default_dof_pos - default_dof_pos
         joint_angles_history = np.zeros((8, 8), dtype=np.float32)

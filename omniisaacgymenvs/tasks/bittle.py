@@ -69,7 +69,7 @@ class BittleTask(RLTask):
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
-        self.rew_scales["energy_cost"] = self._task_cfg["env"]["learn"]["energyCostScale"]
+        self.rew_scales["energy_cost"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -95,6 +95,8 @@ class BittleTask(RLTask):
         self.max_episode_length = int(self.max_episode_length_s / self.dt + 0.5)
         self.Kp = self._task_cfg["env"]["control"]["stiffness"]
         self.Kd = self._task_cfg["env"]["control"]["damping"]
+        self.max_force = self._task_cfg["env"]["control"]["max_force"]
+
 
         for key in self.rew_scales.keys():
             self.rew_scales[key] *= self.dt
@@ -136,7 +138,8 @@ class BittleTask(RLTask):
                 joint_paths.append(f"{quadrant}_{component}/{quadrant}_{sub}_joint")
             joint_paths.append(f"base_frame_link/{quadrant}_shoulder_joint")
         for joint_path in joint_paths:
-            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 2500)  # FIX IT
+            #set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 2500)  # FIX IT
+            set_drive(f"{bittle.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, self.max_force) #FIX IT
 
         self.default_dof_pos = torch.zeros((self.num_envs, 8), dtype=torch.float, device=self.device,
                                            requires_grad=False)
@@ -358,7 +361,9 @@ class BittleTask(RLTask):
 
         ###############################################################################################
         # torch.diag(torch.mm(x,y.T))
-        torques = torch.clip(self.Kp * (self.current_targets - dof_pos) - self.Kd * dof_vel, -80., 80.)
+        # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)
+        torques = torch.clip(self.Kp * (self.current_targets - self.last_dof_pos) - self.Kd * self.last_dof_vel, -80.,
+                             80.)
 
         # torques = 1 * (self.default_dof_pos - dof_pos) + 0.0 * (dof_vel)
         # print("torques0:",torques,self.current_targets,dof_pos)
@@ -367,8 +372,8 @@ class BittleTask(RLTask):
 
         # print("torques3:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
         energy_cost = torch.diag(torch.abs(torch.mm(torques, dof_vel.T)))
-        rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]
-        # print(":",rew_energy_cost)
+        # rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]
+        rew_energy_cost = energy_cost * self.rew_scales["energy_cost"]
         ###############################################################################################
         # print("K:",lin_vel_error,rew_lin_vel_xy,rew_energy_cost,rew_energy_cost)
 

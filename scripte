@@ -41,7 +41,7 @@ PYTHON_PATH scripts/rlgames_train.py task=Bittle num_envs=1 train.params.config.
 PYTHON_PATH scripts/rlgames_train.py task=bittle num_envs=512 train.params.config.minibatch_size=8192 train.params.config.horizon_length=16 test=true checkpoint=runs/Bittle/nn/Bittle.pth
 
 - 测试向前走效果（使用infer_test.py)
-PYTHON_PATH scripts/rlgames_infer_test.py task=Bittle test=True checkpoint="runs/Bittle/nn/Bittle.pth" headless=True num_envs=1 max_iterations=10
+PYTHON_PATH scripts/rlgames_infer_test.py task=Bittle test=True checkpoint="runs/Bittle/nn/Bittle.pth" headless=False num_envs=1 max_iterations=10
 
 - 执行bittle 参数设置
 isaac sim 中载入bittle usd，在script editor 中执行
@@ -54,5 +54,7 @@ bittle_setting.py (设置一些关节参数，重量参数等等）
 3. 启动rl 控制程序（和服务端交互）
    PYTHON_PATH scripts/infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1 (对应bittle_art_udp_rl_script_pose.py）
    PYTHON_PATH scripts/infer_udp_bittle.py task=Bittle test=True checkpoint="runs\Bittle\nn\Bittle.pth" headless=True num_envs=1（对应bittle_art_udp_rl_script_imu.py）
+   实体bittle 使用http 交互
+   PYTHON_PATH scripts/infer_udp_bittle_imu_http.py task=Bittle test=True checkpoint="Bittle_walk_back.pth" headless=True num_envs=1（对应real bittle）
 
 

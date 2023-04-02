@@ -117,3 +117,8 @@ https://www.youtube.com/watch?v=phTnbmXM06g&t=436s
 控制bittle
 anymal 学习介绍
 https://www.youtube.com/watch?v=Afi17BnSuBM
+
+==============================4.2日总结================================
+向前走随机速度0.5-1.0
+向后走随机速度-1,-1
+向前走加入了扭矩奖励 ，同样适用于后退

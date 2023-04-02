@@ -220,13 +220,12 @@ class BittleTask(RLTask):
         indices = torch.arange(self._bittles.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
         current_targets = self.current_targets + self.action_scale * self.actions * self.dt
-        # FIX ITcommands_scaled
-        # print("self.bittle_dof_lower_limits:",self.bittle_dof_lower_limits)
-        # print("self.bittle_dof_upper_limits:",self.bittle_dof_upper_limits)
-        # print("self.actions:",self.actions,self.dt)
-        # print("self.current_targets1:",self.current_targets)
-        # ds = np.deg2rad(15)
-        # current_targets = self.current_targets + self.actions * ds
+
+        #########################################################################################
+        _current_targets = current_targets.cpu().detach().numpy()
+        _current_targets = np.deg2rad(np.round(np.rad2deg(_current_targets)))  # Fix IT min 1 deg
+        current_targets = torch.Tensor(_current_targets).to(self._device)
+        ##########################################################################################
         self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits,
                                                self.bittle_dof_upper_limits)
         # print("self.current_targets2:",self.current_targets)
@@ -352,48 +351,27 @@ class BittleTask(RLTask):
             "action_rate"]
         # rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
 
-        # current_positions_y = torso_position[:, 1]
-        # last_positions_y = self.last_positions[:, 1]
-        # state_robot_ang_roll = self._bittles.get_euler_positions()[:,0]
-        # print(":",current_positions_y,last_positions_y,state_robot_ang_roll)
-        # print("total1:",torch.sum(current_positions_y - last_positions_y,dim=1))
-        # print("total2:",torch.abs(state_robot_ang_roll))
-        # print("total3:",torch.sum(torch.abs(state_robot_ang_roll),dim=1))
-        # total_reward = 1.0 * torch.sum((current_positions_y - last_positions_y),dim=1) * 100 - \
-        #                torch.sum(torch.abs(state_robot_ang_roll),dim=1) * 1.0
-        # total_reward = 1.0 * (current_positions_y - last_positions_y) * 1 - \
-        #               torch.abs(state_robot_ang_roll) * 0.0
 
         ###############################################################################################
         # torch.diag(torch.mm(x,y.T))
         # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)
         # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)
-
         # torques = 1 * (self.default_dof_pos - dof_pos) + 0.0 * (dof_vel)
         # print("torques0:",torques,self.current_targets,dof_pos)
         # torques = torch.sum(torch.abs(_torques))
         # print("torques1:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
-
         # print("torques3:",torch.diag(torch.abs(torch.mm(torques,dof_vel.T))))
         # energy_cost = torch.diag(torch.mm(torques,dof_vel.T))
         # rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]
         rew_energy_cost = torch.sum(torch.square(self.prev_torques - self.torques), dim=1) * self.rew_scales[
             "energy_cost"]
         # rew_torque = torch.sum(torch.square(torques), dim=1)
-
         # print(":",rew_torque)
         # rew_energy_cost = rew_torque * self.rew_scales["energy_cost"]
         # print(":",energy_cost,rew_energy_cost)
         ###############################################################################################
-        # print("K:",lin_vel_error,rew_lin_vel_xy,rew_energy_cost,rew_energy_cost)
-
         total_reward = rew_lin_vel_xy + rew_action_rate + rew_lin_vel_z + rew_ang_vel_z + rew_joint_acc + rew_energy_cost
-        # total_reward = rew_lin_vel_xy + rew_energy_cost
-        # print("total:",self._bittles.get_euler_positions())
-        # total_reward = 1.0 * (current_positions_y - last_positions_y) * 1 + rew_energy_cost
-        # print("total_reward:",total_reward,rew_energy_cost)
         total_reward = torch.clip(total_reward, 0.0, None)
-        # print("total_reward:",total_reward)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]

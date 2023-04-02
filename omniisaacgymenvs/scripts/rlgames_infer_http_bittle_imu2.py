@@ -236,18 +236,23 @@ class RLGTrainer():
             # acts = acts.flatten()
             print("Action :",_acts)
             acts = _acts
+            ##############################################################################
+            _current_targets = current_targets + 13.5 * acts * 1 / 100
+            _targets = np.clip(_current_targets, lower_limits, upper_limits)
             param = {
-                'la1': round(np.rad2deg(acts[0])),
-                'ra1': round(np.rad2deg(acts[1])),
-                'ra2': round(np.rad2deg(acts[2])),
-                'la2': round(np.rad2deg(acts[3])),
+                'la2': round(np.rad2deg(_targets[0])),
+                'la1': round(np.rad2deg(_targets[1])),
+                'ra2': round(np.rad2deg(_targets[2])),
+                'ra1': round(np.rad2deg(_targets[3])),
 
-                'll1': -round(np.rad2deg(acts[4])),
-                'rl1': -round(np.rad2deg(acts[5])),
-                'rl2': -round(np.rad2deg(acts[6])),
-                'll2': -round(np.rad2deg(acts[7])),
+                'll2': -round(np.rad2deg(_targets[4])),
+                'll1': -round(np.rad2deg(_targets[5])),
+                'rl2': -round(np.rad2deg(_targets[6])),
+                'rl1': -round(np.rad2deg(_targets[7])),
             }
+            print("param:", param)
             response = requests.get(url=driver_location, params=param)
+            ###############################################################################
             #s.sendto(acts.tostring(), addr)
             num_steps += 1
             print('Num steps: ', num_steps)

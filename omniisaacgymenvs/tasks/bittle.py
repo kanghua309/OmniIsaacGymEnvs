@@ -227,9 +227,15 @@ class BittleTask(RLTask):
         # print("self.current_targets1:",self.current_targets)
         # ds = np.deg2rad(15)
         # current_targets = self.current_targets + self.actions * ds
+        #########################################################################################
+        _current_targets = current_targets.cpu().detach().numpy()
+        _current_targets = np.deg2rad(np.round(np.rad2deg(_current_targets)))  # Fix IT min 1 deg
+        current_targets = torch.Tensor(_current_targets).to(self._device)
+        ##########################################################################################
         self.current_targets[:] = tensor_clamp(current_targets, self.bittle_dof_lower_limits,
                                                self.bittle_dof_upper_limits)
         # print("self.current_targets2:",self.current_targets)
+
         self._bittles.set_joint_position_targets(self.current_targets, indices)
 
     def reset_idx(self, env_ids):
@@ -346,19 +352,6 @@ class BittleTask(RLTask):
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales[
             "action_rate"]
         # rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
-
-        # current_positions_y = torso_position[:, 1]
-        # last_positions_y = self.last_positions[:, 1]
-        # state_robot_ang_roll = self._bittles.get_euler_positions()[:,0]
-        # print(":",current_positions_y,last_positions_y,state_robot_ang_roll)
-        # print("total1:",torch.sum(current_positions_y - last_positions_y,dim=1))
-        # print("total2:",torch.abs(state_robot_ang_roll))
-        # print("total3:",torch.sum(torch.abs(state_robot_ang_roll),dim=1))
-        # total_reward = 1.0 * torch.sum((current_positions_y - last_positions_y),dim=1) * 100 - \
-        #                torch.sum(torch.abs(state_robot_ang_roll),dim=1) * 1.0
-        # total_reward = 1.0 * (current_positions_y - last_positions_y) * 1 - \
-        #               torch.abs(state_robot_ang_roll) * 0.0
-
         ###############################################################################################
         # torch.diag(torch.mm(x,y.T))
         # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)

@@ -13,7 +13,7 @@ env:
   controlFrequencyInv: 5
 
   baseInitState:
-    pos: [0.0, 0.0, 1.06] # x,y,z [m]  1.08 好像是bittle  base 的高度？
+    pos: [0.0, 0.0, 1.06] # x,y,z [m]  1.06 好像是bittle  base 的高度？
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]

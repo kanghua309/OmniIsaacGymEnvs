@@ -33,7 +33,6 @@ env:
   defaultJointAngles:  # = target angles when action = 0.0
 
     #顺序不要乱动！！！
-
     left_back_shoulder_joint: 0.523       # [rad] <-
     left_front_shoulder_joint: 0.623      # [rad] <-
     right_back_shoulder_joint: -0.523     # [rad] <-

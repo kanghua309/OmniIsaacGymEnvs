@@ -29,7 +29,7 @@ import torch
 from typing import Optional
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
-from sim4real.utils.rotation import tensor_get_euler_positions
+from sim4real.utils.rotation import tensor_quaternion_to_euler,tensor_get_euler_positions
 
 # def quaternion_to_euler(x, y, z, w):
 
@@ -55,24 +55,24 @@ import numpy as np
 #pitch：绕y轴
 #yaw：绕z轴
 
-def quaternion_to_euler(w, x, y, z):
-    #print(x)
-    t0 = +2.0 * (w * x + y * z)
-    t1 = +1.0 - 2.0 * (x * x + y * y)
-    #print(t1)
-    roll = torch.atan2(t0, t1)
-    #print("roll:",roll)
-    t2 = +2.0 * (w * y - z * x)
-    # t2 = +1.0 if t2 > +1.0 else t2
-    # t2 = -1.0 if t2 < -1.0 else t2
-    t2 = torch.where(t2 > +1.0, +1.0, t2)
-    t2 = torch.where(t2 < -1.0, -1.0, t2)
-    pitch = torch.asin(t2)
-    t3 = +2.0 * (w * z + x * y)
-    t4 = +1.0 - 2.0 * (y * y + z * z)
-    yaw = torch.atan2(t3, t4)
-    #print(yaw,pitch,roll)
-    return torch.stack([roll, pitch, yaw],dim=0).T
+# def quaternion_to_euler(w, x, y, z):
+#     #print(x)
+#     t0 = +2.0 * (w * x + y * z)
+#     t1 = +1.0 - 2.0 * (x * x + y * y)
+#     #print(t1)
+#     roll = torch.atan2(t0, t1)
+#     #print("roll:",roll)
+#     t2 = +2.0 * (w * y - z * x)
+#     # t2 = +1.0 if t2 > +1.0 else t2
+#     # t2 = -1.0 if t2 < -1.0 else t2
+#     t2 = torch.where(t2 > +1.0, +1.0, t2)
+#     t2 = torch.where(t2 < -1.0, -1.0, t2)
+#     pitch = torch.asin(t2)
+#     t3 = +2.0 * (w * z + x * y)
+#     t4 = +1.0 - 2.0 * (y * y + z * z)
+#     yaw = torch.atan2(t3, t4)
+#     #print(yaw,pitch,roll)
+#     return torch.stack([roll, pitch, yaw],dim=0).T
 
 class BittleView(ArticulationView):
     def __init__(
@@ -119,15 +119,15 @@ class BittleView(ArticulationView):
         z = base_orientation[:, 3]
         w = base_orientation[:, 0]
         #print("orient:",x,y)
-        ang = quaternion_to_euler(x,y,z,w)
+        ang = tensor_quaternion_to_euler(w,x,y,z)
         #print("ang:",ang)
         return (ang[:,1] > threshold) | (ang[:,1] < -1 * threshold) | (ang[:,0] > threshold) | (ang[:,0] < -1* threshold)
 
     def get_euler_positions(self):
         torso_position, torso_rotation = self.get_world_poses(clone=False)
-        x = torso_rotation[:, 1]
-        y = torso_rotation[:, 2]
-        z = torso_rotation[:, 3]
-        w = torso_rotation[:, 0]
-        ang = torch.Tensor(tensor_get_euler_positions(w, x, y, z))
+        # x = torso_rotation[:, 1]
+        # y = torso_rotation[:, 2]
+        # z = torso_rotation[:, 3]
+        # w = torso_rotation[:, 0]
+        ang = torch.Tensor(tensor_get_euler_positions(torso_rotation))
         return ang

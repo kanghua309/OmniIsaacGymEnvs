@@ -41,7 +41,6 @@ def initialize_task(config, env, init_sim=True):
     from omniisaacgymenvs.tasks.shadow_hand import ShadowHandTask
     from omniisaacgymenvs.tasks.crazyflie import CrazyflieTask
     from omniisaacgymenvs.tasks.bittle import BittleTask
-    from omniisaacgymenvs.tasks.bittle_imu import BittleIMUTask
 
 
     
@@ -62,7 +61,6 @@ def initialize_task(config, env, init_sim=True):
         "ShadowHandOpenAI_FF": ShadowHandTask,
         "ShadowHandOpenAI_LSTM": ShadowHandTask,
         "Bittle": BittleTask,
-        "BittleIMU": BittleIMUTask,
     }
 
     from .config_utils.sim_config import SimConfig

@@ -13,10 +13,10 @@ env:
   controlFrequencyInv: 2
 
   baseInitState:
-    pos: [0.0, 0.0, 0.62] # x,y,z [m]
-    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
-    vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
-    vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+    pos: [0.0, 0.0, 0.62] # carter_navigation_params.yaml,y,z [m]
+    rot: [0.0, 0.0, 0.0, 1.0] # carter_navigation_params.yaml,y,z,w [quat]
+    vLinear: [0.0, 0.0, 0.0]  # carter_navigation_params.yaml,y,z [m/s]
+    vAngular: [0.0, 0.0, 0.0]  # carter_navigation_params.yaml,y,z [rad/s]
 
   randomCommandVelocityRanges:
     linear_x: [-2., 2.] # min max [m/s]

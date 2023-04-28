@@ -79,7 +79,7 @@ print("upper_limits:",upper_limits)
 # transform = dc.get_rigid_body_pose(body)
 # print("torso_rotation:", transform.r)
 # print("torse_rotation's rotaion:",torch.Tensor(transform.r))
-# torso_rotation = torch.Tensor([transform.r.w,transform.r.x, transform.r.y, transform.r.z]) #FIX IT w index change
+# torso_rotation = torch.Tensor([transform.r.w,transform.r.carter_navigation_params.yaml, transform.r.y, transform.r.z]) #FIX IT w index change
 # torso_rotation = torch.unsqueeze(torso_rotation, 0)
 # print("torse_rotation's rotaion1:",torso_rotation)
 

@@ -13,10 +13,10 @@ env:
   controlFrequencyInv: 5
 
   baseInitState:
-    pos: [0.0, 0.0, 1.06] # x,y,z [m]  1.08 好像是bittle  base 的高度？
-    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
-    vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
-    vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+    pos: [0.0, 0.0, 1.06] # carter_navigation_params.yaml,y,z [m]  1.08 好像是bittle  base 的高度？
+    rot: [0.0, 0.0, 0.0, 1.0] # carter_navigation_params.yaml,y,z,w [quat]
+    vLinear: [0.0, 0.0, 0.0]  # carter_navigation_params.yaml,y,z [m/s]
+    vAngular: [0.0, 0.0, 0.0]  # carter_navigation_params.yaml,y,z [rad/s]
 
   randomCommandVelocityRanges:
     linear_x: [-0., 0.] # min max [m/s]

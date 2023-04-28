@@ -74,7 +74,7 @@ class Anymal_runner(object):
             prim = define_prim("/World", "Xform")
             #     asset_path = assets_root_path + "/Isaac/Environments/Simple_Warehouse/warehouse.usd"
             prim.GetReferences().AddReference(scenario_path)
-        # print("x:",x)
+        # print("carter_navigation_params.yaml:",carter_navigation_params.yaml)
         # prim = define_prim("/", "Xform")
         # self._world.scene.add()
         # spawn warehouse scene
@@ -194,7 +194,7 @@ class Anymal_runner(object):
 def callback(msg):
     print("callback:----------------------------------------------------------------")
     # 处理Twist消息的回调函数
-    # linear_velocity = msg.linear.x
+    # linear_velocity = msg.linear.carter_navigation_params.yaml
     # angular_velocity = msg.angular.z
     # 进行一些处理，例如控制机器人
     print("Twist msg:", msg)

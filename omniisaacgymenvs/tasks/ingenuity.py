@@ -189,7 +189,7 @@ class IngenuityTask(RLTask):
     def set_targets(self, env_ids):
         num_sets = len(env_ids)
         envs_long = env_ids.long()
-        # set target position randomly with x, y in (-1, 1) and z in (1, 2)
+        # set target position randomly with carter_navigation_params.yaml, y in (-1, 1) and z in (1, 2)
         self.target_positions[envs_long, 0:2] = torch.rand((num_sets, 2), device=self._device) * 2 - 1
         self.target_positions[envs_long, 2] = torch.rand(num_sets, device=self._device) + 1
 

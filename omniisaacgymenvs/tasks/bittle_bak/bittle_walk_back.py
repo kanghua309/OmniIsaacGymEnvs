@@ -308,7 +308,7 @@ class BittleTask(RLTask):
         # rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"] #FIX IT
 
         ###############################################################################################
-        # torch.diag(torch.mm(x,y.T))
+        # torch.diag(torch.mm(carter_navigation_params.yaml,y.T))
         torques = torch.clip(self.Kp * (self.current_targets - dof_pos) - self.Kd * dof_vel, -80., 80.)
         energy_cost = torch.diag(torch.abs(torch.mm(torques, dof_vel.T)))
         rew_energy_cost = torch.exp(-energy_cost / 0.25) * self.rew_scales["energy_cost"]

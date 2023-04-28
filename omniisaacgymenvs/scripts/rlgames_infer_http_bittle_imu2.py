@@ -65,23 +65,23 @@ from sim4real.utils.rotation import point_rotation_by_quaternion, euler_from_qua
 #     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
 #     return [ qw, qx, qy, qz ]
 #
-# def euler_from_quaternion(x, y, z, w):
+# def euler_from_quaternion(carter_navigation_params.yaml, y, z, w):
 #     """
 #     Convert a quaternion into euler angles (roll, pitch, yaw)
-#     roll is rotation around x in radians (counterclockwise)
+#     roll is rotation around carter_navigation_params.yaml in radians (counterclockwise)
 #     pitch is rotation around y in radians (counterclockwise)
 #     yaw is rotation around z in radians (counterclockwise)
 #     """
-#     t0 = +2.0 * (w * x + y * z)
-#     t1 = +1.0 - 2.0 * (x * x + y * y)
+#     t0 = +2.0 * (w * carter_navigation_params.yaml + y * z)
+#     t1 = +1.0 - 2.0 * (carter_navigation_params.yaml * carter_navigation_params.yaml + y * y)
 #     roll_x = math.atan2(t0, t1)
 #
-#     t2 = +2.0 * (w * y - z * x)
+#     t2 = +2.0 * (w * y - z * carter_navigation_params.yaml)
 #     t2 = +1.0 if t2 > +1.0 else t2
 #     t2 = -1.0 if t2 < -1.0 else t2
 #     pitch_y = math.asin(t2)
 #
-#     t3 = +2.0 * (w * z + x * y)
+#     t3 = +2.0 * (w * z + carter_navigation_params.yaml * y)
 #     t4 = +1.0 - 2.0 * (y * y + z * z)
 #     yaw_z = math.atan2(t3, t4)
 #

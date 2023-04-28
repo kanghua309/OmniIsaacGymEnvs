@@ -31,19 +31,19 @@ from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
 from sim4real.utils.rotation import tensor_quaternion_to_euler,tensor_get_euler_positions
 
-# def quaternion_to_euler(x, y, z, w):
+# def quaternion_to_euler(carter_navigation_params.yaml, y, z, w):
 
 #         import math
-#         t0 = +2.0 * (w * x + y * z)
-#         t1 = +1.0 - 2.0 * (x * x + y * y)
+#         t0 = +2.0 * (w * carter_navigation_params.yaml + y * z)
+#         t1 = +1.0 - 2.0 * (carter_navigation_params.yaml * carter_navigation_params.yaml + y * y)
 #         X = math.degrees(math.atan2(t0, t1))
 
-#         t2 = +2.0 * (w * y - z * x)
+#         t2 = +2.0 * (w * y - z * carter_navigation_params.yaml)
 #         t2 = +1.0 if t2 > +1.0 else t2
 #         t2 = -1.0 if t2 < -1.0 else t2
 #         Y = math.degrees(math.asin(t2))
 
-#         t3 = +2.0 * (w * z + x * y)
+#         t3 = +2.0 * (w * z + carter_navigation_params.yaml * y)
 #         t4 = +1.0 - 2.0 * (y * y + z * z)
 #         Z = math.degrees(math.atan2(t3, t4))
 
@@ -55,20 +55,20 @@ import numpy as np
 #pitch：绕y轴
 #yaw：绕z轴
 
-# def quaternion_to_euler(w, x, y, z):
-#     #print(x)
-#     t0 = +2.0 * (w * x + y * z)
-#     t1 = +1.0 - 2.0 * (x * x + y * y)
+# def quaternion_to_euler(w, carter_navigation_params.yaml, y, z):
+#     #print(carter_navigation_params.yaml)
+#     t0 = +2.0 * (w * carter_navigation_params.yaml + y * z)
+#     t1 = +1.0 - 2.0 * (carter_navigation_params.yaml * carter_navigation_params.yaml + y * y)
 #     #print(t1)
 #     roll = torch.atan2(t0, t1)
 #     #print("roll:",roll)
-#     t2 = +2.0 * (w * y - z * x)
+#     t2 = +2.0 * (w * y - z * carter_navigation_params.yaml)
 #     # t2 = +1.0 if t2 > +1.0 else t2
 #     # t2 = -1.0 if t2 < -1.0 else t2
 #     t2 = torch.where(t2 > +1.0, +1.0, t2)
 #     t2 = torch.where(t2 < -1.0, -1.0, t2)
 #     pitch = torch.asin(t2)
-#     t3 = +2.0 * (w * z + x * y)
+#     t3 = +2.0 * (w * z + carter_navigation_params.yaml * y)
 #     t4 = +1.0 - 2.0 * (y * y + z * z)
 #     yaw = torch.atan2(t3, t4)
 #     #print(yaw,pitch,roll)
@@ -118,14 +118,14 @@ class BittleView(ArticulationView):
         y = base_orientation[:, 2]
         z = base_orientation[:, 3]
         w = base_orientation[:, 0]
-        #print("orient:",x,y)
+        #print("orient:",carter_navigation_params.yaml,y)
         ang = tensor_quaternion_to_euler(w,x,y,z)
         #print("ang:",ang)
         return (ang[:,1] > threshold) | (ang[:,1] < -1 * threshold) | (ang[:,0] > threshold) | (ang[:,0] < -1* threshold)
 
     def get_euler_positions(self):
         torso_position, torso_rotation = self.get_world_poses(clone=False)
-        # x = torso_rotation[:, 1]
+        # carter_navigation_params.yaml = torso_rotation[:, 1]
         # y = torso_rotation[:, 2]
         # z = torso_rotation[:, 3]
         # w = torso_rotation[:, 0]

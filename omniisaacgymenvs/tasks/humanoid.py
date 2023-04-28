@@ -90,10 +90,10 @@ class HumanoidLocomotionTask(LocomotionTask):
                 67.5000, # pelvis
                 45.0000, # right_lower_arm
                 45.0000, # left_lower_arm
-                45.0000, # right_thigh: x
+                45.0000, # right_thigh: carter_navigation_params.yaml
                 135.0000, # right_thigh: y
                 45.0000, # right_thigh: z
-                45.0000, # left_thigh: x
+                45.0000, # left_thigh: carter_navigation_params.yaml
                 135.0000, # left_thigh: y
                 45.0000, # left_thigh: z
                 90.0000, # right_knee

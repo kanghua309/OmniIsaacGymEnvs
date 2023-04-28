@@ -133,7 +133,7 @@ class AnymalTerrainTask(RLTask):
         self.common_step_counter = 0
         self.extras = {}
         self.noise_scale_vec = self._get_noise_scale_vec(self._task_cfg)
-        self.commands = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False) # x vel, y vel, yaw vel, heading
+        self.commands = torch.zeros(self.num_envs, 4, dtype=torch.float, device=self.device, requires_grad=False) # carter_navigation_params.yaml vel, y vel, yaw vel, heading
         self.commands_scale = torch.tensor([self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale], device=self.device, requires_grad=False,)
         self.gravity_vec = torch.tensor(get_axis_params(-1., self.up_axis_idx), dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
         self.forward_vec = torch.tensor([1., 0., 0.], dtype=torch.float, device=self.device).repeat((self.num_envs, 1))
@@ -357,7 +357,7 @@ class AnymalTerrainTask(RLTask):
         return self.obs_buf, self.rew_buf, self.reset_buf, self.extras
 
     def push_robots(self):
-        self.base_velocities[:, 0:2] = torch_rand_float(-1., 1., (self.num_envs, 2), device=self.device) # lin vel x/y
+        self.base_velocities[:, 0:2] = torch_rand_float(-1., 1., (self.num_envs, 2), device=self.device) # lin vel carter_navigation_params.yaml/y
         self._anymals.set_velocities(self.base_velocities)
     
     def check_termination(self):

@@ -282,7 +282,7 @@ class CrazyflieTask(RLTask):
     def set_targets(self, env_ids):
         num_sets = len(env_ids)
         envs_long = env_ids.long()
-        # set target position randomly with x, y in (0, 0) and z in (2)
+        # set target position randomly with carter_navigation_params.yaml, y in (0, 0) and z in (2)
         self.target_positions[envs_long, 0:2] = torch.zeros((num_sets, 2), device=self._device)
         self.target_positions[envs_long, 2] = torch.ones(num_sets, device=self._device) * 2.0
 

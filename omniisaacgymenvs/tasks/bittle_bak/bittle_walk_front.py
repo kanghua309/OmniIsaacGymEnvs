@@ -353,7 +353,7 @@ class BittleTask(RLTask):
 
 
         ###############################################################################################
-        # torch.diag(torch.mm(x,y.T))
+        # torch.diag(torch.mm(carter_navigation_params.yaml,y.T))
         # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)
         # torques = torch.clip(self.Kp*(self.current_targets - self.last_dof_pos) - self.Kd*self.last_dof_vel, -80., 80.)
         # torques = 1 * (self.default_dof_pos - dof_pos) + 0.0 * (dof_vel)

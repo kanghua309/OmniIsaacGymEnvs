@@ -113,20 +113,20 @@ from sim4real.utils.rotation import tensor_get_euler_positions
 
 
 #
-# def quaternion_to_euler(x, y, z, w):
-#     # print(x)
-#     t0 = +2.0 * (w * x + y * z)
-#     t1 = +1.0 - 2.0 * (x * x + y * y)
+# def quaternion_to_euler(carter_navigation_params.yaml, y, z, w):
+#     # print(carter_navigation_params.yaml)
+#     t0 = +2.0 * (w * carter_navigation_params.yaml + y * z)
+#     t1 = +1.0 - 2.0 * (carter_navigation_params.yaml * carter_navigation_params.yaml + y * y)
 #     # print(t1)
 #     roll = torch.atan2(t0, t1)
 #     # print("roll:",roll)
-#     t2 = +2.0 * (w * y - z * x)
+#     t2 = +2.0 * (w * y - z * carter_navigation_params.yaml)
 #     # t2 = +1.0 if t2 > +1.0 else t2
 #     # t2 = -1.0 if t2 < -1.0 else t2
 #     t2 = torch.where(t2 > +1.0, +1.0, t2)
 #     t2 = torch.where(t2 < -1.0, -1.0, t2)
 #     pitch = torch.asin(t2)
-#     t3 = +2.0 * (w * z + x * y)
+#     t3 = +2.0 * (w * z + carter_navigation_params.yaml * y)
 #     t4 = +1.0 - 2.0 * (y * y + z * z)
 #     yaw = torch.atan2(t3, t4)
 #     # print(yaw,pitch,roll)
@@ -134,11 +134,11 @@ from sim4real.utils.rotation import tensor_get_euler_positions
 #
 #
 # def get_euler_positions(torso_rotation):
-#     x = torso_rotation[:, 1]
+#     carter_navigation_params.yaml = torso_rotation[:, 1]
 #     y = torso_rotation[:, 2]
 #     z = torso_rotation[:, 3]
 #     w = torso_rotation[:, 0]
-#     ang = torch.Tensor(quaternion_to_euler(x, y, z, w))
+#     ang = torch.Tensor(quaternion_to_euler(carter_navigation_params.yaml, y, z, w))
 #     return ang
 
 
